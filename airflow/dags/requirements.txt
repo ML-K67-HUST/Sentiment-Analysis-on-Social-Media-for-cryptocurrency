@@ -1,0 +1,7 @@
+pymongo==4.6.1
+beautifulsoup4==4.12.2
+kafka-python==2.0.2
+fake-useragent==1.5.1
+discordwebhook==1.0.3
+requests==2.31.0
+python-dotenv==1.0.0

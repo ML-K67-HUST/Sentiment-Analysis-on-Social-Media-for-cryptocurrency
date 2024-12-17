@@ -1,0 +1,6 @@
+airflow/.env
+backend/.env
+kafka/.env
+venv
+airflow/logs
+airflow/plugins
