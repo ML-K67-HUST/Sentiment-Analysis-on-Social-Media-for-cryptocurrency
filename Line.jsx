@@ -127,6 +127,9 @@ export const LineGraph = () => {
                         day: 'MMM dd',
                     },
                 },
+                grid: {
+                    display: false,
+                },
                 title: {
                     display: false,
                     text: 'Date',
