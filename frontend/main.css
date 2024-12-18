@@ -148,12 +148,20 @@ html:focus-within {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     display: flex;
-    justify-content: space-between;
-    flex-direction: row;
+    justify-content: left;
+    flex-direction: column;
     border-right: 1px solid #343a40;
 }
 
-.bitcoin img {
+.bitcoin-upper {
+    display: flex;
+    justify-content: left;
+    padding: 1rem;
+    margin-top: 2.5rem;
+    gap: 0.5rem;
+}
+
+.btc-icon {
     animation: rotate 10s linear infinite;
     flex-shrink: 0;
 }
@@ -169,22 +177,103 @@ html:focus-within {
 
 .btc {
     font-family: var(--main-font);
-    font-size: 22px;
-    font-weight: 500;
+    font-size: 24px;
+    font-weight: 400;
     color: white;
+    margin-top: 2px;
 }
 
 .abbre {
     font-family: var(--main-font);
-    font-size: 22px;
-    font-weight: 500;
+    font-size: 24px;
+    font-weight: 400;
     color: #6c757d;
+    margin-top: 2px;
 }
 
 .positive-rate {
     grid-column: 2 / 4;
     grid-row: 1 / 2;
-    background-color: #081c15; 
-    opacity: 0.6;
+    background-color: rgba(8, 28, 21, 0.6); 
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
 }
 
+.positive-upper {
+    display: flex;
+    justify-content: left;
+    padding: 1rem;
+    margin-top: 2.5rem;
+}
+
+.pst {
+    font-family: var(--main-font);
+    font-size: 24px;
+    font-weight: 400;
+    color: #e9ecef;
+    margin-top: 2px;
+}
+
+.bitcoin-lower {
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
+    padding: 1rem;
+
+}
+
+.price{
+    font-family: var(--main-font);
+    font-size: 48px;
+    font-weight: 500;
+    color: white;
+}
+
+.status {
+    display: flex;
+    justify-content: left;
+}
+
+.status p {
+    font-family: var(--main-font);
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+}
+
+.status img {
+    width: 30px;
+}
+
+.positive-lower {
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.rate {
+    font-family: var(--main-font);
+    font-size: 48px;
+    font-weight: 500;
+    color: white;
+    margin-top: 8px;
+}
+
+.pst-status {
+    display: flex;
+    justify-content: left;
+    gap: 0.5rem;
+}
+
+.trend {
+    width: 25px;
+}
+
+.pst-status-text {
+    font-family: var(--main-font);
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+}
