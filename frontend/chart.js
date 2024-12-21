@@ -44,7 +44,7 @@ async function createChart() {
                             x: entry.timestamp, 
                             y: Math.round(entry.price * 100) / 100 
                         })),
-                        borderColor: 'rgb(255, 0, 0)',
+                        borderColor: '#F7931A',
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         fill: false,
                         yAxisID: 'y',
@@ -175,7 +175,7 @@ async function createChart() {
                         },
                         title: {
                             display: false,
-                            text: 'Index Score (%)',
+                            text: 'Positive Rate (%)',
                         },
                         ticks: {
                             font: {

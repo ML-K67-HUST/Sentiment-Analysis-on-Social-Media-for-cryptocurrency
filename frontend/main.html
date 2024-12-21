@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./style/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
                     <div class="bitcoin-lower">
                         <p class="price">$100,041.97</p>
                         <div class="status">
-                            <img class="status-icon" src="./img/arrow_drop_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
+                            <img class="status-icon" src="./style/assets/arrow_drop_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
                             <p class="status-text">2.401%</p>
                         </div>
                     </div>
@@ -41,7 +41,7 @@
                     <div class="positive-lower">
                         <p class="rate">49,53%</p>
                         <div class="pst-status">
-                            <img class="trend" src="./img/trending_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
+                            <img class="trend" src="./style/assets/trending_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
                             <p class="pst-status-text">Positive</p>
                         </div>
                     </div>
@@ -53,25 +53,17 @@
         </div>
         <div class="item right">
             <div class="news-nav">
-                <p id="cmc"class="nav-item">CoinMarket</a>
-                <p id="x" class="nav-item">X</p>
+                <p data-source="CoinMarketCap" class="nav-item">CoinMarketCap</a>
+                <p data-source="X" class="nav-item">X</p>
             </div>
-            <div class="news">
-                <img class="fake" src="./img/fake.png">
+            <div class="load-news" id="newsContainer">
+                
             </div>
         </div>
     </div>
-    <script>
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                document.querySelectorAll('.nav-item').forEach(link => {
-                    link.classList.remove('active');
-                });
-                e.currentTarget.classList.add('active');
-            });
-        });
-    </script>
-    <script src="script.js"></script>
+    <script src="news.js"></script>
+    <script src="status_btc.js"></script>
     <script src="chart.js"></script>
+    <script src="status_positive.js"></script>
 </body>
 </html>
