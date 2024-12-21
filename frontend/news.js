@@ -47,6 +47,13 @@ function createSentimentElement(sentiment) {
 function createNewsElement(newsItem) {
     const newsDiv = document.createElement('div');
     newsDiv.className = 'news';
+
+    newsDiv.addEventListener('click', () => {
+        const newsLink = newsItem.link || newsItem.links;
+        if (newsLink) {
+            window.open(newsLink, '_blank');
+        }
+    });
     
     const timestamp = document.createElement('div');
     timestamp.className = 'timestamp';
@@ -89,6 +96,7 @@ const exampleNewsData = [
         timestamp: "1 hours ago",
         title: "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
         description: "The world of cryptocurrencies is in turmoil...",
+        links: 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
         sentiments: [
             {
                 type: "Positive",
@@ -104,6 +112,7 @@ const exampleNewsData = [
         timestamp: "1 hours ago",
         title: "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
         description: "The world of cryptocurrencies is in turmoil...",
+        links: 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
         sentiments: [
             {
                 type: "Negative",
@@ -115,6 +124,7 @@ const exampleNewsData = [
         timestamp: "1 hours ago",
         title: "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
         description: "The world of cryptocurrencies is in turmoil...",
+        link: 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
         sentiments: [
             {
                 type: "Positive",
@@ -126,6 +136,7 @@ const exampleNewsData = [
         timestamp: "1 hours ago",
         title: "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
         description: "The world of cryptocurrencies is in turmoil...",
+        link: 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
         sentiments: [
             {
                 type: "Positive",
@@ -144,6 +155,7 @@ const xNewsData = [
         timestamp: "2 hours ago",
         title: "X Platform News Example",
         description: "@userid",
+        link: 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
         sentiments: [
             {
                 type: "Positive",
