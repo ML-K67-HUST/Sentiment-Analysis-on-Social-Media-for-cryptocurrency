@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1734618714218
+current_stage: None
+description: null
+last_updated_timestamp: 1734618714218
+name: sk-learn-random-forest-reg-model
+run_id: 1e9be04d4abf4a3697813859c991ee42
+run_link: null
+source: file:///home/kh4ngptt/Documents/COURSE/DS/sentiman%20crypto/mlflow/test_experiment/mlruns/0/1e9be04d4abf4a3697813859c991ee42/artifacts/sklearn-model
+status: READY
+status_message: null
+storage_location: file:///home/kh4ngptt/Documents/COURSE/DS/sentiman%20crypto/mlflow/test_experiment/mlruns/0/1e9be04d4abf4a3697813859c991ee42/artifacts/sklearn-model
+user_id: null
+version: 1

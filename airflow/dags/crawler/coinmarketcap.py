@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 # from constants.config import MONGO_MODESTUS_DB_NAME
 # from constants.crypto import TOP_50_CRYPTO_COINMARKETCAP
 
-from common.processor import fetch_use_proxy
+from common.processor import fetch_use_proxy,fetch
 # from database.mongodb import MongoManager
 # from database.kafka import Kafka
 # from utils.common import execute_multithreading_functions, get_chunks
@@ -76,7 +76,9 @@ def articles_link_of_(page, coin_id) -> list:
             "newsTypes": ["NEWS", "ALEXANDRIA"],
         }
     )
-    content = fetch_use_proxy("POST", url, headers=headers, data=payload).json()
+    # content = fetch_use_proxy("POST", url, headers=headers, data=payload).json()
+    content = fetch("POST", url, headers=headers, data=payload).json()
+
     for article in content.get("data"):
         # if 'https://coinmarketcap.com/' in article['meta']['sourceUrl']:
         links.append(
@@ -186,4 +188,4 @@ def crawl_article_by_coin_id(coin_id, symbol, page_num, category=None):
     print(f"DONE PAGE {page_num} FOR TOKEN: {symbol}")
     return contents
 
-print(crawl_article_by_coin_id(1,'BTC',1))
+# print(crawl_article_by_coin_id(1,'BTC',1))

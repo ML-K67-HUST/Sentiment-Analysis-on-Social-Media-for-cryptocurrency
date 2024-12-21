@@ -4,7 +4,7 @@ from time import sleep
 from random import choice
 from kafka import KafkaProducer
 
-kafka_server = ["kafka:9092"]
+kafka_server = ["localhost:9092"]
 
 topic = "coinmarketcap-news"
 

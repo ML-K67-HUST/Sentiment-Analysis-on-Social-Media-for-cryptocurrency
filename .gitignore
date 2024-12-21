@@ -4,3 +4,4 @@ kafka/.env
 venv
 airflow/logs
 airflow/plugins
+mlflow/.env

@@ -21,7 +21,7 @@ class Kafka:
         # self.topic = topic
         self.producer = KafkaProducer(
             # bootstrap_servers=[f"{KAFKA_HOST}:{KAFKA_PORT}"],
-            bootstrap_servers=["127.0.0.1"],
+            bootstrap_servers=["kafka:9092"],
             value_serializer=lambda x: dumps(x).encode("utf-8"),
             # security_protocol="SASL_PLAINTEXT",
             # sasl_mechanism="SCRAM-SHA-256",
