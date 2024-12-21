@@ -1,0 +1,502 @@
+[
+    {
+        "timestamp": "2024-12-16T09:00:00.000Z",
+        "bitcoin_index_score": 0.8495206335441747,
+        "price": 104772.01
+    },
+    {
+        "timestamp": "2024-12-16T08:00:00.000Z",
+        "bitcoin_index_score": 0.8531264027749439,
+        "price": 104894.45
+    },
+    {
+        "timestamp": "2024-12-16T07:00:00.000Z",
+        "bitcoin_index_score": 0.8420759408938492,
+        "price": 105149.75
+    },
+    {
+        "timestamp": "2024-12-16T06:00:00.000Z",
+        "bitcoin_index_score": 0.8413067101246186,
+        "price": 105065.19
+    },
+    {
+        "timestamp": "2024-12-16T05:00:00.000Z",
+        "bitcoin_index_score": 0.8329623618628174,
+        "price": 104566.99
+    },
+    {
+        "timestamp": "2024-12-16T04:00:00.000Z",
+        "bitcoin_index_score": 0.8292993581998137,
+        "price": 104573.99
+    },
+    {
+        "timestamp": "2024-12-16T03:00:00.000Z",
+        "bitcoin_index_score": 0.8277325793115267,
+        "price": 104775.99
+    },
+    {
+        "timestamp": "2024-12-16T02:00:00.000Z",
+        "bitcoin_index_score": 0.8306263522052995,
+        "price": 105563.44
+    },
+    {
+        "timestamp": "2024-12-16T01:00:00.000Z",
+        "bitcoin_index_score": 0.8281080371869844,
+        "price": 105295.72
+    },
+    {
+        "timestamp": "2024-12-16T00:00:00.000Z",
+        "bitcoin_index_score": 0.8159740475042199,
+        "price": 104608.01
+    },
+    {
+        "timestamp": "2024-12-15T23:00:00.000Z",
+        "bitcoin_index_score": 0.8016983232284957,
+        "price": 103478.72
+    },
+    {
+        "timestamp": "2024-12-15T22:00:00.000Z",
+        "bitcoin_index_score": 0.8041594038145762,
+        "price": 102621.51
+    },
+    {
+        "timestamp": "2024-12-15T21:00:00.000Z",
+        "bitcoin_index_score": 0.8143372367343447,
+        "price": 103025
+    },
+    {
+        "timestamp": "2024-12-15T20:00:00.000Z",
+        "bitcoin_index_score": 0.8117967664519388,
+        "price": 103194.61
+    },
+    {
+        "timestamp": "2024-12-15T19:00:00.000Z",
+        "bitcoin_index_score": 0.8110275356827081,
+        "price": 103277.34
+    },
+    {
+        "timestamp": "2024-12-15T18:00:00.000Z",
+        "bitcoin_index_score": 0.8132336628888353,
+        "price": 103233.87
+    },
+    {
+        "timestamp": "2024-12-15T17:00:00.000Z",
+        "bitcoin_index_score": 0.8054714251265975,
+        "price": 103027.99
+    },
+    {
+        "timestamp": "2024-12-15T16:00:00.000Z",
+        "bitcoin_index_score": 0.8039329635881359,
+        "price": 102776.02
+    },
+    {
+        "timestamp": "2024-12-15T15:00:00.000Z",
+        "bitcoin_index_score": 0.8006416647230665,
+        "price": 102850.98
+    },
+    {
+        "timestamp": "2024-12-15T14:00:00.000Z",
+        "bitcoin_index_score": 0.8031637328189054,
+        "price": 102701.34
+    },
+    {
+        "timestamp": "2024-12-15T13:00:00.000Z",
+        "bitcoin_index_score": 0.8068654409468429,
+        "price": 102754.18
+    },
+    {
+        "timestamp": "2024-12-15T12:00:00.000Z",
+        "bitcoin_index_score": 0.8044247298863539,
+        "price": 102799.99
+    },
+    {
+        "timestamp": "2024-12-15T11:00:00.000Z",
+        "bitcoin_index_score": 0.802830732485905,
+        "price": 102228.02
+    },
+    {
+        "timestamp": "2024-12-15T10:00:00.000Z",
+        "bitcoin_index_score": 0.7969616016167739,
+        "price": 102327.44
+    },
+    {
+        "timestamp": "2024-12-15T09:00:00.000Z",
+        "bitcoin_index_score": 0.7958377254928978,
+        "price": 101955.05
+    },
+    {
+        "timestamp": "2024-12-15T08:00:00.000Z",
+        "bitcoin_index_score": 0.7990486706276179,
+        "price": 101656.22
+    },
+    {
+        "timestamp": "2024-12-15T07:00:00.000Z",
+        "bitcoin_index_score": 0.8050056765846239,
+        "price": 101855.59
+    },
+    {
+        "timestamp": "2024-12-15T06:00:00.000Z",
+        "bitcoin_index_score": 0.8050056765846239,
+        "price": 102140.06
+    },
+    {
+        "timestamp": "2024-12-15T05:00:00.000Z",
+        "bitcoin_index_score": 0.8065996739850729,
+        "price": 102462.22
+    },
+    {
+        "timestamp": "2024-12-15T04:00:00.000Z",
+        "bitcoin_index_score": 0.8081381355235344,
+        "price": 101810.3
+    },
+    {
+        "timestamp": "2024-12-15T03:00:00.000Z",
+        "bitcoin_index_score": 0.8010156284010274,
+        "price": 101814.19
+    },
+    {
+        "timestamp": "2024-12-15T02:00:00.000Z",
+        "bitcoin_index_score": 0.8034563394615163,
+        "price": 101940
+    },
+    {
+        "timestamp": "2024-12-15T01:00:00.000Z",
+        "bitcoin_index_score": 0.8098245614035087,
+        "price": 101458.92
+    },
+    {
+        "timestamp": "2024-12-15T00:00:00.000Z",
+        "bitcoin_index_score": 0.8085859694869507,
+        "price": 101491.82
+    },
+    {
+        "timestamp": "2024-12-14T23:00:00.000Z",
+        "bitcoin_index_score": 0.8093552002561815,
+        "price": 101093.87
+    },
+    {
+        "timestamp": "2024-12-14T22:00:00.000Z",
+        "bitcoin_index_score": 0.8172469381479194,
+        "price": 101122.57
+    },
+    {
+        "timestamp": "2024-12-14T21:00:00.000Z",
+        "bitcoin_index_score": 0.8195173938881546,
+        "price": 100962.83
+    },
+    {
+        "timestamp": "2024-12-14T20:00:00.000Z",
+        "bitcoin_index_score": 0.8220256111143368,
+        "price": 101360
+    },
+    {
+        "timestamp": "2024-12-14T19:00:00.000Z",
+        "bitcoin_index_score": 0.840149739714729,
+        "price": 101000
+    },
+    {
+        "timestamp": "2024-12-14T18:00:00.000Z",
+        "bitcoin_index_score": 0.8414535206795268,
+        "price": 101053.53
+    },
+    {
+        "timestamp": "2024-12-14T17:00:00.000Z",
+        "bitcoin_index_score": 0.8414535206795268,
+        "price": 101615.76
+    },
+    {
+        "timestamp": "2024-12-14T16:00:00.000Z",
+        "bitcoin_index_score": 0.833946485718585,
+        "price": 101619.4
+    },
+    {
+        "timestamp": "2024-12-14T15:00:00.000Z",
+        "bitcoin_index_score": 0.8362426969700201,
+        "price": 101422.36
+    },
+    {
+        "timestamp": "2024-12-14T14:00:00.000Z",
+        "bitcoin_index_score": 0.8430187713492552,
+        "price": 101352.01
+    },
+    {
+        "timestamp": "2024-12-14T13:00:00.000Z",
+        "bitcoin_index_score": 0.8399380212535796,
+        "price": 101348.01
+    },
+    {
+        "timestamp": "2024-12-14T12:00:00.000Z",
+        "bitcoin_index_score": 0.8506200223884887,
+        "price": 101604.01
+    },
+    {
+        "timestamp": "2024-12-14T11:00:00.000Z",
+        "bitcoin_index_score": 0.8453149826006903,
+        "price": 101583.37
+    },
+    {
+        "timestamp": "2024-12-14T10:00:00.000Z",
+        "bitcoin_index_score": 0.8511632772535389,
+        "price": 101469.69
+    },
+    {
+        "timestamp": "2024-12-14T09:00:00.000Z",
+        "bitcoin_index_score": 0.8588555849458467,
+        "price": 101668.79
+    },
+    {
+        "timestamp": "2024-12-14T08:00:00.000Z",
+        "bitcoin_index_score": 0.859985030333272,
+        "price": 101783.28
+    },
+    {
+        "timestamp": "2024-12-14T07:00:00.000Z",
+        "bitcoin_index_score": 0.8531802966054615,
+        "price": 101863.64
+    },
+    {
+        "timestamp": "2024-12-14T06:00:00.000Z",
+        "bitcoin_index_score": 0.8493341427593075,
+        "price": 101770.31
+    },
+    {
+        "timestamp": "2024-12-14T05:00:00.000Z",
+        "bitcoin_index_score": 0.8419376930551655,
+        "price": 101716
+    },
+    {
+        "timestamp": "2024-12-14T04:00:00.000Z",
+        "bitcoin_index_score": 0.8424596232571185,
+        "price": 102108.33
+    },
+    {
+        "timestamp": "2024-12-14T03:00:00.000Z",
+        "bitcoin_index_score": 0.8393575237201857,
+        "price": 102155.89
+    },
+    {
+        "timestamp": "2024-12-14T02:00:00.000Z",
+        "bitcoin_index_score": 0.8393575237201857,
+        "price": 102015.86
+    },
+    {
+        "timestamp": "2024-12-14T01:00:00.000Z",
+        "bitcoin_index_score": 0.8385996608933574,
+        "price": 102016.36
+    },
+    {
+        "timestamp": "2024-12-14T00:00:00.000Z",
+        "bitcoin_index_score": 0.8393575237201857,
+        "price": 101400.57
+    },
+    {
+        "timestamp": "2024-12-13T23:00:00.000Z",
+        "bitcoin_index_score": 0.8393575237201857,
+        "price": 101265.53
+    },
+    {
+        "timestamp": "2024-12-13T22:00:00.000Z",
+        "bitcoin_index_score": 0.8429221159605347,
+        "price": 101374.99
+    },
+    {
+        "timestamp": "2024-12-13T21:00:00.000Z",
+        "bitcoin_index_score": 0.8367059015440259,
+        "price": 101542.98
+    },
+    {
+        "timestamp": "2024-12-13T20:00:00.000Z",
+        "bitcoin_index_score": 0.8295833944215187,
+        "price": 101395.99
+    },
+    {
+        "timestamp": "2024-12-13T19:00:00.000Z",
+        "bitcoin_index_score": 0.8288255315946903,
+        "price": 101416.01
+    },
+    {
+        "timestamp": "2024-12-13T18:00:00.000Z",
+        "bitcoin_index_score": 0.8371910656393415,
+        "price": 101800
+    },
+    {
+        "timestamp": "2024-12-13T17:00:00.000Z",
+        "bitcoin_index_score": 0.8239141378887296,
+        "price": 100832
+    },
+    {
+        "timestamp": "2024-12-13T16:00:00.000Z",
+        "bitcoin_index_score": 0.8168911165263432,
+        "price": 100125.86
+    },
+    {
+        "timestamp": "2024-12-13T15:00:00.000Z",
+        "bitcoin_index_score": 0.8098981095333363,
+        "price": 100981.9
+    },
+    {
+        "timestamp": "2024-12-13T14:00:00.000Z",
+        "bitcoin_index_score": 0.8143489903925475,
+        "price": 100308
+    },
+    {
+        "timestamp": "2024-12-13T13:00:00.000Z",
+        "bitcoin_index_score": 0.8114213387793376,
+        "price": 100237.1
+    },
+    {
+        "timestamp": "2024-12-13T12:00:00.000Z",
+        "bitcoin_index_score": 0.807758335116334,
+        "price": 100405.7
+    },
+    {
+        "timestamp": "2024-12-13T11:00:00.000Z",
+        "bitcoin_index_score": 0.8081439144492819,
+        "price": 100412
+    },
+    {
+        "timestamp": "2024-12-13T10:00:00.000Z",
+        "bitcoin_index_score": 0.8009817218032182,
+        "price": 100136.52
+    },
+    {
+        "timestamp": "2024-12-13T09:00:00.000Z",
+        "bitcoin_index_score": 0.8039156676551198,
+        "price": 100293.25
+    },
+    {
+        "timestamp": "2024-12-13T08:00:00.000Z",
+        "bitcoin_index_score": 0.8039156676551198,
+        "price": 100143.56
+    },
+    {
+        "timestamp": "2024-12-13T07:00:00.000Z",
+        "bitcoin_index_score": 0.8096599233993756,
+        "price": 99600
+    },
+    {
+        "timestamp": "2024-12-13T06:00:00.000Z",
+        "bitcoin_index_score": 0.8156169293563814,
+        "price": 99910.9
+    },
+    {
+        "timestamp": "2024-12-13T05:00:00.000Z",
+        "bitcoin_index_score": 0.8156169293563814,
+        "price": 100105.94
+    },
+    {
+        "timestamp": "2024-12-13T04:00:00.000Z",
+        "bitcoin_index_score": 0.8096599233993756,
+        "price": 99716
+    },
+    {
+        "timestamp": "2024-12-13T03:00:00.000Z",
+        "bitcoin_index_score": 0.8033071929379864,
+        "price": 99680
+    },
+    {
+        "timestamp": "2024-12-13T02:00:00.000Z",
+        "bitcoin_index_score": 0.8075211847919035,
+        "price": 99493.88
+    },
+    {
+        "timestamp": "2024-12-13T01:00:00.000Z",
+        "bitcoin_index_score": 0.8112334434950879,
+        "price": 99952
+    },
+    {
+        "timestamp": "2024-12-13T00:00:00.000Z",
+        "bitcoin_index_score": 0.814839212725857,
+        "price": 100059.99
+    },
+    {
+        "timestamp": "2024-12-12T23:00:00.000Z",
+        "bitcoin_index_score": 0.8205238071695258,
+        "price": 100294.1
+    },
+    {
+        "timestamp": "2024-12-12T22:00:00.000Z",
+        "bitcoin_index_score": 0.8306588962519833,
+        "price": 99792.96
+    },
+    {
+        "timestamp": "2024-12-12T21:00:00.000Z",
+        "bitcoin_index_score": 0.8212659649065979,
+        "price": 99919.78
+    },
+    {
+        "timestamp": "2024-12-12T20:00:00.000Z",
+        "bitcoin_index_score": 0.818726958280778,
+        "price": 99716
+    },
+    {
+        "timestamp": "2024-12-12T19:00:00.000Z",
+        "bitcoin_index_score": 0.8105279457548425,
+        "price": 100901.96
+    },
+    {
+        "timestamp": "2024-12-12T18:00:00.000Z",
+        "bitcoin_index_score": 0.8151367984406183,
+        "price": 101432
+    },
+    {
+        "timestamp": "2024-12-12T17:00:00.000Z",
+        "bitcoin_index_score": 0.8048647493021724,
+        "price": 101499.99
+    },
+    {
+        "timestamp": "2024-12-12T16:00:00.000Z",
+        "bitcoin_index_score": 0.8179417160825191,
+        "price": 102243.78
+    },
+    {
+        "timestamp": "2024-12-12T15:00:00.000Z",
+        "bitcoin_index_score": 0.8056098253477246,
+        "price": 101717.49
+    },
+    {
+        "timestamp": "2024-12-12T14:00:00.000Z",
+        "bitcoin_index_score": 0.8027165984683206,
+        "price": 100839.79
+    },
+    {
+        "timestamp": "2024-12-12T13:00:00.000Z",
+        "bitcoin_index_score": 0.8003148362732458,
+        "price": 100762.92
+    },
+    {
+        "timestamp": "2024-12-12T12:00:00.000Z",
+        "bitcoin_index_score": 0.7980880114797583,
+        "price": 100547.47
+    },
+    {
+        "timestamp": "2024-12-12T11:00:00.000Z",
+        "bitcoin_index_score": 0.7957069271378802,
+        "price": 100481.03
+    },
+    {
+        "timestamp": "2024-12-12T10:00:00.000Z",
+        "bitcoin_index_score": 0.7866883963494133,
+        "price": 100603.99
+    },
+    {
+        "timestamp": "2024-12-12T09:00:00.000Z",
+        "bitcoin_index_score": 0.778708357685564,
+        "price": 101111.1
+    },
+    {
+        "timestamp": "2024-12-12T08:00:00.000Z",
+        "bitcoin_index_score": 0.7714563874580544,
+        "price": 100545.18
+    },
+    {
+        "timestamp": "2024-12-12T07:00:00.000Z",
+        "bitcoin_index_score": 0.7712186546045365,
+        "price": 100617.64
+    },
+    {
+        "timestamp": "2024-12-12T06:00:00.000Z",
+        "bitcoin_index_score": 0.7677286273048985,
+        "price": 100648.29
+    }
+]

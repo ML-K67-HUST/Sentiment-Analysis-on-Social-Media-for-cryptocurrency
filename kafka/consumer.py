@@ -1,7 +1,7 @@
 import json
 from kafka import KafkaConsumer, KafkaProducer
 
-kafka_server = ["127.0.0.1"]
+kafka_server = ["127.0.0.1:9092"]
 
 topic = "coinmarketcap-news"
 

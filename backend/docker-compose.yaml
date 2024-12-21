@@ -1,0 +1,18 @@
+version: '2'
+services:
+  consumer:
+    build: .
+    env_file:
+      - .env
+
+    container_name: sentiman_consumer
+    restart: always
+    networks:
+      - net
+    command: python consumer.py
+
+networks:
+  net:
+    name: net
+    driver: bridge
+    external: true

@@ -13,6 +13,7 @@ TASK_CRAWL_CMC_NEWS = "collect_latest_10_pages_cmc_article_data"
 
 
 def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
+# def crawl_articles(coin_id, symbol, page_num, max_page):
     mongo_client = MongoManager(MONGO_MODESTUS_DB_NAME)
 
     while page_num <= max_page:
@@ -30,7 +31,7 @@ def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
 
                 for hash_ids in chunk_hash_ids:
                     message = {"hash_ids": hash_ids}
-                    # kafka.producer_send(CMC_NEWS_KAFKA_TOPIC, message)
+                    kafka.producer_send(CMC_NEWS_KAFKA_TOPIC, message)
                     print("COMPLETED PUSH : ", hash_ids)
 
             return
@@ -42,6 +43,7 @@ def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
 
 def crawl_cmc_news(list_crypto):
     crawl_article_by_coin_id_functions = []
+    print('KAFKA TOPIC: ',CMC_NEWS_KAFKA_TOPIC)
     kafka = Kafka()
 
     for token in list_crypto:
@@ -52,7 +54,7 @@ def crawl_cmc_news(list_crypto):
                     "coin_id": token["id"],
                     "symbol": token["symbol"],
                     "page_num": 1,
-                    # "kafka": kafka,
+                    "kafka": kafka,
                     "max_page": 1,
                 },
             }

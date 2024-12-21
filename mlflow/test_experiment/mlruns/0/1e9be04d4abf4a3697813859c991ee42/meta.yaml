@@ -1,0 +1,15 @@
+artifact_uri: file:///home/kh4ngptt/Documents/COURSE/DS/sentiman%20crypto/mlflow/test_experiment/mlruns/0/1e9be04d4abf4a3697813859c991ee42/artifacts
+end_time: 1734618714221
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 1e9be04d4abf4a3697813859c991ee42
+run_name: incongruous-grub-862
+run_uuid: 1e9be04d4abf4a3697813859c991ee42
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1734618711584
+status: 3
+tags: []
+user_id: kh4ngptt
