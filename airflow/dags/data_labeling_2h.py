@@ -18,7 +18,7 @@ def label():
     # }
     filter_condition = {
         "timestamp":{"$lt":time_threshold.timestamp()},
-        # "labeled":"false"
+        "labeled":"false"
     }
     # update_operation = {"$set":{"labeled":"true", "movement_hour_ahead":}}
     # Query từ db unlabeled có timestamp từ 1 giờ trước
@@ -33,21 +33,22 @@ def label():
         print('FILTER:\n')
         print(filter_condition)
         return
+    count = 0
     for record in matching_records:
         record['labeled'] = "true"
         record['movement_hour_ahead'] = get_bitcoin_price_one_hour(str(record['timestamp']))
+        print(record)
         try:
-            mongo_client.update_many(
-                filter={
-                    "hash_id":record['hash_id']
-                },
+            mongo_client.insert_one(
+                collection_name='cmc_labeled_data',
                 data=record
             )
-            print(f"LABELED SUCESSFULLY FOR ARTICLE HASH ID {record['hash_id']}")
+            count += 1
+            print(f"LABELED SUCESSFULLY FOR {count} RECORD")
         except Exception as e:
             print(f'Failed to labelling data: {e}')
         
-    
+        print(f"FINISHED LABELLING {count} FOR THIS BATCH")
     return
 
 

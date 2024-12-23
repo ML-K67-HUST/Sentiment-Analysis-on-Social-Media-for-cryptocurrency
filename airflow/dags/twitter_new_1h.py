@@ -159,7 +159,7 @@ def process_twitter_crypto():
 
 
 default_args = {
-    "owner": "haw.nv",
+    "owner": "khangptt",
     "start_date": datetime(2024, 2, 18),
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
@@ -168,9 +168,9 @@ default_args = {
 
 
 dag = DAG(
-    "modestus_twitter_crypto_interval_20m",
+    "sentiman_twitter_crypto_interval_two_hour",
     default_args=default_args,
-    description="Fetch new tweets for topic crypto interval 20m",
+    description="Fetch new tweets for topic crypto interval 2 hour",
     schedule_interval="0 */2 * * *",
     catchup=False,
     tags=["sentiman", "twitter"],

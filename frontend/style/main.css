@@ -419,6 +419,14 @@ html:focus-within {
     border: 1px solid rgba(255, 68, 68, 0.2);
 }
 
+.sentiment.reporting {
+    border: 1px solid rgb(0, 64, 107);
+}
+
+.sentiment.manipulate {
+    border: 1px solid rgb(55, 0, 107);
+}
+
 .positive {
     background-color: rgba(5, 219, 172, 0.1);
 }
@@ -427,6 +435,13 @@ html:focus-within {
     background-color: rgba(255, 68, 68, 0.1);
 }
 
+.reporting {
+    background-color: rgba(0, 64, 107, 0.356);
+}
+
+.manipulate {
+    background-color: rgba(59, 0, 107, 0.356);
+}
 .sentiment-header {
     display: flex;
     font-size: 16px;
@@ -440,11 +455,22 @@ html:focus-within {
     color: #ff4444;
 }
 
+.sentiment-header.reporting {
+    color: cyan;
+}
+.sentiment-header.manipulate {
+    color: rgb(199, 169, 255);
+}
 .sentiment-header::before {
     content: "↗";
     margin-right: 8px;
 }
-
+.sentiment-header.reporting::before {
+    content: "-";
+}
+.sentiment-header.manipulate::before {
+    content: "🌀";
+}
 .sentiment-content {
     color: #05DBAC;
     font-size: 14px;
@@ -455,6 +481,12 @@ html:focus-within {
     color: #ff4444;
 }
 
+.sentiment-content.reporting{
+    color: cyan;
+}
+.sentiment-content.manipulate{
+    color: rgb(199, 169, 255);
+}
 .sentiment-header.negative::before {
     content: "↘";
 }
