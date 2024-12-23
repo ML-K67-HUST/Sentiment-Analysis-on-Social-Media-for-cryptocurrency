@@ -21,7 +21,7 @@ Chart.register(verticalLinePlugin);
 // Fetch and process data
 async function createChart() {
     try {
-        const response = await fetch('data_chart.json');
+        const response = await fetch('http://localhost:8000/chart/');
         const dataChart = await response.json();
 
         const sortedData = [...dataChart].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));

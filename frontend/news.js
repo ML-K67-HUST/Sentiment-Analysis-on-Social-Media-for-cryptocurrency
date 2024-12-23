@@ -70,7 +70,7 @@ function createNewsElement(newsItem) {
     title.textContent = newsItem.title;
     
     const description = document.createElement('div');
-    description.className = 'content';
+    description.className = 'description';
     description.textContent = newsItem.description;
     
     newsDiv.appendChild(timestamp);
