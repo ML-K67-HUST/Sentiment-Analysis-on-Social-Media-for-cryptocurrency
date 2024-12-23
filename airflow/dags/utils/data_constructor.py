@@ -22,7 +22,7 @@ def get_bitcoin_change(timePeriod):
 
 def get_bitcoin_price(timestamp):
     headers = {
-        'x-access-token': 'coinrankingcf28de3a1e8ccdad31ea8cb51ed9f8e4a98df79b535570a1',
+        'x-access-token': 'coinranking20b7cf109bbe9e42388a3faf8fe62f8ddda36dd7ec8a9f1f',
     }
     response = requests.request("GET", f"https://api.coinranking.com/v2/coin/Qwsogvtv82FCd/price?timestamp={timestamp}",headers=headers)
     return response.text
