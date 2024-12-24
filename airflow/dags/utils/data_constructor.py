@@ -29,8 +29,11 @@ def get_bitcoin_price(timestamp):
 
 def get_bitcoin_price_one_hour(timestamp):
     one_hour_ahead = str(int(timestamp) + 3600)
+    now = str(int(timestamp))
+    one_hour_price = float(json.loads(get_bitcoin_price(one_hour_ahead))["data"]["price"])
+    now_price = float(json.loads(get_bitcoin_price(now))['data']['price'])
     try:
-        return json.loads(get_bitcoin_price(one_hour_ahead))["data"]["price"]
+        return (one_hour_price-now_price)*100/now_price
     except Exception as e:
         return None
 
