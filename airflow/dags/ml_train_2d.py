@@ -7,19 +7,24 @@ import time
 DAG_NAME = "ml_train_2d"
 TASK_CRAWL_CMC_NEWS = "automatically_train_and_deploy_model_for_each_2d"
 def extract_data(**kwargs):
-    # Giả sử bạn trả về dữ liệu cần truyền đi
+    ### Hàm này làm preprocessing data
+    ### Input : csv file
+    
+    ### Output: transformed csv để fit vào model
     data = {'feature1': [1, 2, 3], 'feature2': [4, 5, 6]}
     return data  # Dữ liệu này được lưu vào XCom
 
 def train_and_evaluate_models(ti, **kwargs):
-    # Lấy dữ liệu từ task trước thông qua XCom
+    ### Train + evaluate model dùng grid search
+    ### Input: transformed csv để fit vào moodel (output của hàm extract_data() ở trên)
+    
+    ### Output: array của checkpoint tốt nhất cho các model
     extracted_data = ti.xcom_pull(task_ids='extract_data')
     print("Data for training:", extracted_data)
     model_results = {'model_name': 'model_v1', 'accuracy': 0.95}
     return model_results
 
 def deploy_best_model(ti, **kwargs):
-    # Lấy kết quả training từ XCom
     model_results = ti.xcom_pull(task_ids='train_and_evaluate_models')
     print("Deploying:", model_results)
 
