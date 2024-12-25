@@ -27,10 +27,10 @@
                         <p class="abbre">BTC</p>
                     </div>
                     <div class="bitcoin-lower">
-                        <p class="price">anh hen em pickleball</p>
+                        <p class="price">Fetching bitcoin price</p>
                         <div class="status">
                             <img class="status-icon" src="style/assets/arrow_drop_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
-                            <p class="status-text">ta von nhau pickleball</p>
+                            <p class="status-text">Fetching bitcoin movemment</p>
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                         <p class="pst">Positive rate</p>
                     </div>
                     <div class="positive-lower">
-                        <p class="rate">49,53%</p>
+                        <p class="rate">Fetching positive rate%</p>
                         <div class="pst-status">
                             <img class="trend" src="style/assets/trending_up_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
                             <p class="pst-status-text">Positive</p>
@@ -51,7 +51,7 @@
                         <p class="ml">ML Prediction</p>
                     </div>
                     <div class="ml-lower">
-                        <p class="predict">49,53%</p>
+                        <p class="predict">Fetching prediction</p>
                     </div>
                     <div class="pst-status">
                         <p class="pst-status-text">Latest training time : 2 days ago</p>
@@ -60,6 +60,13 @@
                 </div>
             </div>
             <div class="left-chart">
+                <label for"options">Choose a date</label>
+                <select id="options" name="options">
+                    <option value="option-1">Last day</option> 
+                    <option value="option-2">Three day ago</option> 
+                    <option value="option-3">One week ago</option> 
+                    <option value="option-4">One month ago</option> 
+                </select>
                 <canvas id="bitcoinChart"></canvas>
             </div>
         </div>
@@ -74,6 +81,7 @@
         </div>
     </div>
     <script src="news.js"></script>
+    <script src="status_ml.js"></script>
     <script src="status_btc.js"></script>
     <script src="chart.js"></script>
     <script src="status_positive.js"></script>

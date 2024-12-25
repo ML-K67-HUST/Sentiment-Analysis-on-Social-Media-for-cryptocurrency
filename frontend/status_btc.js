@@ -2,6 +2,7 @@ let lastPrice = 0;
 
 async function updateBitcoinPrice() {
 try {
+    console.log("Updated BTC")
     const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
     const data = await response.json();
     
@@ -37,4 +38,4 @@ try {
 
 // Update immediately and then every minute
 updateBitcoinPrice();
-setInterval(updateBitcoinPrice, 30000);
+setInterval(updateBitcoinPrice, 60000);
