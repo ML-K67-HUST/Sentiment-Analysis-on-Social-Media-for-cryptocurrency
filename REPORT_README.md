@@ -1,8 +1,5 @@
 # Báo Cáo Tiến Độ Dự Án: Sentiment Analysis on Cryptocurrency
 
-**Nhóm thực hiện:** Group 18
-**Ngày báo cáo:** 21/12/2025
-
 ---
 
 ## 1. Luồng Hoạt Động Hệ Thống (System Architecture Flow)
