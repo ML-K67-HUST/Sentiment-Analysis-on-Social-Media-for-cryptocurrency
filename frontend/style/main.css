@@ -339,10 +339,57 @@ html:focus-within {
 .left-chart {
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    padding: 1rem;
+    padding: 1rem 3.5rem 2rem 3.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+}
+
+.chart-label {
+    font-family: var(--main-font);
+    font-size: 18px;
+    font-weight: 500;
+    color: #adb5bd;
+}
+
+.chart-select {
+    font-family: var(--main-font);
+    font-size: 16px;
+    font-weight: 400;
+    color: #fff;
+    background-color: #263344;
+    border: 1px solid #191D26;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.chart-select:hover {
+    background-color: #2f3e52;
+    border-color: #05DBAC;
+}
+
+.chart-select:focus {
+    border-color: #05DBAC;
+    box-shadow: 0 0 0 2px rgba(5, 219, 172, 0.1);
+}
+
+.chart-select option {
+    background-color: #263344;
+    color: #fff;
+    padding: 10px;
 }
 
 .siuuu {
@@ -354,10 +401,9 @@ html:focus-within {
 #bitcoinChart {
     width: 100%;
     height: 100%;
-    padding-top: 6rem;
-    padding-left: 3.5rem;
-    padding-right: 3.5rem;
+    max-height: calc(100% - 80px);
     margin: 0;
+    padding: 0;
 }
 
 .news-nav {

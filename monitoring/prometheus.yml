@@ -1,0 +1,46 @@
+# Prometheus Configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'sentiman'
+    environment: 'development'
+
+# Scrape configs
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # MongoDB Exporter
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          service: 'mongodb'
+
+  # Consumer Metrics API
+  - job_name: 'consumer-metrics'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['consumer-metrics-api:8003']
+        labels:
+          service: 'consumers'
+
+  # Backend API
+  - job_name: 'backend-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['backend-api:8000']
+        labels:
+          service: 'api'
+
+  # ML API
+  - job_name: 'ml-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['backend-ml-api:8002']
+        labels:
+          service: 'ml'

@@ -3,17 +3,16 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from constants.crypto import TOP_50_CRYPTO_COINMARKETCAP
 from constants.config import MONGO_MODESTUS_DB_NAME
-from database.kafka import Kafka
 from database.mongodb import MongoManager
-from utils.common import execute_multithreading_functions, get_chunks
-from crawler.coinmarketcap import CMC_NEWS_KAFKA_TOPIC, article_content_of_cmc_, article_content_of_other_, articles_link_of_, crawl_article_by_coin_id
+from utils.common import execute_multithreading_functions
+from crawler.coinmarketcap import CMC_NEWS_KAFKA_TOPIC, crawl_article_by_coin_id
+from kafka_producer import send_article_ids  # Import from DAGs folder
 
-DAG_NAME = "cmc_news_24h"
+DAG_NAME = "cmc_news_10m"
 TASK_CRAWL_CMC_NEWS = "collect_latest_10_pages_cmc_article_data"
 
 
-def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
-# def crawl_articles(coin_id, symbol, page_num, max_page):
+def crawl_articles(coin_id, symbol, page_num, max_page):
     mongo_client = MongoManager(MONGO_MODESTUS_DB_NAME)
 
     while page_num <= max_page:
@@ -24,15 +23,15 @@ def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
                 inserted_ids, error_ids, hash_ids = mongo_client.insert_many(
                     "cmc_news", contents
                 )
-                # print("🚀 ~ error_ids:", error_ids)
                 print("COMPLETE INSERT MANY: ", hash_ids)
 
-                chunk_hash_ids = get_chunks(hash_ids, 10)
-
-                for hash_ids in chunk_hash_ids:
-                    message = {"hash_ids": hash_ids}
-                    kafka.producer_send(CMC_NEWS_KAFKA_TOPIC, message)
-                    print("COMPLETED PUSH : ", hash_ids)
+                # Send to Kafka with simple producer
+                if hash_ids:
+                    if symbol == 'BTC':
+                        send_article_ids(CMC_NEWS_KAFKA_TOPIC, hash_ids)
+                        print(f"Sent {len(hash_ids)} BTC articles to Kafka")
+                    else:
+                        print(f"Skipped Kafka for symbol {symbol} (Only BTC allowed)")
 
             return
         except Exception as e:
@@ -43,8 +42,7 @@ def crawl_articles(coin_id, symbol, page_num, kafka, max_page):
 
 def crawl_cmc_news(list_crypto):
     crawl_article_by_coin_id_functions = []
-    print('KAFKA TOPIC: ',CMC_NEWS_KAFKA_TOPIC)
-    kafka = Kafka()
+    print('KAFKA TOPIC: ', CMC_NEWS_KAFKA_TOPIC)
 
     for token in list_crypto:
         crawl_article_by_coin_id_functions.append(
@@ -54,7 +52,6 @@ def crawl_cmc_news(list_crypto):
                     "coin_id": token["id"],
                     "symbol": token["symbol"],
                     "page_num": 1,
-                    "kafka": kafka,
                     "max_page": 1,
                 },
             }
@@ -81,8 +78,8 @@ default_args = {
 dag = DAG(
     DAG_NAME,
     default_args=default_args,
-    description="Crawl new articles from CoinMarketCap in the last 24 hours",
-    schedule_interval="0 */1 * * *",
+    description="Crawl new articles from CoinMarketCap in the last 10 minutes",
+    schedule_interval="*/10 * * * *",
     catchup=False,
     max_active_runs=1,
     tags=["coinmarketcap", "article"],

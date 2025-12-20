@@ -1,5 +1,19 @@
 from pymongo import errors, MongoClient
-from constants.config import MONGODB_URL
+import os
+import sys
+
+# Add parent directory to path to import config
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from config import config
+    MONGODB_URL = config.MONGODB_CONNECTION_STRING
+except ImportError:
+    # Fallback for backward compatibility
+    try:
+        from constants.config import MONGODB_URL
+    except ImportError:
+        MONGODB_URL = os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27017")
 
 
 class MongoManager:
@@ -19,6 +33,7 @@ class MongoManager:
 
         self.db = db
         self.connection_str = uri if uri is not None else MONGODB_URL
+        print(f"📊 MongoDB connecting to: {self.connection_str}")
         self.__client = MongoClient(self.connection_str)
         self.__database = self.__client[self.db]
 

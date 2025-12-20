@@ -1,103 +1,136 @@
 import json
+import time
+from tqdm import tqdm
 from kafka import KafkaConsumer, KafkaProducer
 from database.mongodb import MongoManager
 from bson.objectid import ObjectId
 from LLM.sentiment_agent import infer_policy, infer_sentiment
 from data_constructor import construct_unlabeled_dataset
-# from database.mongodb import MongoClient
-# from data_constructor import construct_unlabeled_dataset
-# from LLM.sentiment_agent import infer_sentiment
-
-# mongo_client = MongoClient('blog-data')
 
 kafka_server = ["kafka:9092"]
-
 topic = "coinmarketcap-news"
 
 mongo_client = MongoManager('blog-data')
 
 consumer = KafkaConsumer(
     bootstrap_servers=kafka_server,
+    group_id="llm-sentiment-group",
     value_deserializer=json.loads,
-    auto_offset_reset="latest",
+    auto_offset_reset="earliest",
 )
 
-consumer.subscribe(topic)
+consumer.subscribe([topic])  # CRITICAL: subscribe() requires a LIST
+
+print("=" * 80, flush=True)
+print("🚀 LLM SENTIMENT CONSUMER", flush=True)
+print("=" * 80, flush=True)
+print(f"Topic: {topic}", flush=True)
+print(f"Group: llm-sentiment-group", flush=True)
+print(f"Model: Gemini 2.0 Flash Lite (Free Tier)", flush=True)
+print(f"Rate Limit: 15 req/min → 60s sleep between articles", flush=True)
+print("=" * 80, flush=True)
+print("⏳ Waiting for messages...\n", flush=True)
 
 while True:
-    data = next(consumer)
-    # blog_data = mongo_client.find(data)
-    
-    # print(data)
-    print("NEW ARTICLES FOUND:\n")
-    print(data.value)
-    
-    articles = data.value["hash_ids"]
-    for article in articles:
-        print(article)
-        record = mongo_client.find_one(
-            collection_name='cmc_news',
-            filter={
-                "hash_id":article,
-                "symbol":"BTC"
-            }
-        )
-        if not record:
-            continue
-        print("Query result from db:\n")
-        # idd = str(record['_id'])
-        title = record['title']
-        url = record['url']
-        symbol = record['symbol']
-        content = record['content']
-        timestamp = record['timestamp']
-        hash_id = record['hash_id']
-        category = record['category']
+    for message in consumer:
+        data = message
+        articles = data.value["hash_ids"]
         
-        btc_sentiment = {}
-        infered_policy = infer_policy(content)
-        if not infered_policy:
-            continue
-        print('INFERED_POLICY:\n')
-        print(infered_policy)
-        for policy in infered_policy["metrics"]:
-            btc_sentiment[policy['policy']] = {
-                "reasoning": policy['reasoning'],
-                "result": policy["classification"]
-            }
+        print(f"\n📦 Batch: {len(articles)} articles | Offset: {message.offset}", flush=True)
+        
+        # Process with progress bar
+        success_count = 0
+        error_count = 0
+        skip_count = 0
+        
+        pbar = tqdm(articles, desc="Processing", unit="article", ncols=100)
+        
+        for article in pbar:
+            pbar.set_description(f"📄 {article[:16]}...")
+            
+            try:
+                # Get article from DB
+                record = mongo_client.find_one(
+                    collection_name='cmc_news',
+                    filter={"hash_id": article}
+                )
                 
-        
-        
-        data_to_store = {
-            # "_id" : idd,
-            "btc_sentiment" : btc_sentiment,
-            "timestamp":timestamp,
-            "hash_id":hash_id,
-            "source":"cmc_news",
-            "symbol":symbol,
-            "source_data": [
-                {
-                # "_id":idd,
-                "title":title,
-                "url":url,
-                "symbol":symbol,
-                "content":content,
-                "timestamp":timestamp,
-                "hash_id":hash_id,
-                "category":category
+                if not record:
+                    skip_count += 1
+                    pbar.set_postfix({"✅": success_count, "⏭️": skip_count, "❌": error_count}, refresh=True)
+                    continue
+                
+                # Extract data
+                title = record['title']
+                symbol = record['symbol']
+                content = record['content']
+                
+                # Call LLM for sentiment
+                infered_policy = infer_policy(content)
+                
+                if not infered_policy:
+                    error_count += 1
+                    pbar.set_postfix({"✅": success_count, "⏭️": skip_count, "❌": error_count}, refresh=True)
+                    continue
+                
+                # Parse sentiment
+                btc_sentiment = {}
+                if "metrics" in infered_policy:
+                    for policy in infered_policy["metrics"]:
+                        btc_sentiment[policy['policy']] = {
+                            "reasoning": policy['reasoning'],
+                            "result": policy["classification"]
+                        }
+                else:
+                    btc_sentiment["bitcoin_sentiment"] = {
+                        "reasoning": infered_policy.get('reasoning', ''),
+                        "result": infered_policy.get('sentiment', 'unknown'),
+                        "confidence": infered_policy.get('confidence', 0.0)
+                    }
+                
+                # Store sentiment data
+                data_to_store = {
+                    "btc_sentiment": btc_sentiment,
+                    "timestamp": record['timestamp'],
+                    "hash_id": article,
+                    "source": "cmc_news",
+                    "symbol": symbol,
+                    "source_data": [{
+                        "title": title,
+                        "url": record['url'],
+                        "symbol": symbol,
+                        "content": content,
+                        "timestamp": record['timestamp'],
+                        "hash_id": article,
+                        "category": record.get('category', '')
+                    }]
                 }
-            ]
-        }
+                
+                mongo_client.insert_one(collection_name='cmc_sentiment_data', data=data_to_store)
+                
+                # Store unlabeled data
+                sentiment_score = infer_sentiment(infered_policy)
+                unlabeled_data = construct_unlabeled_dataset(sentiment_score)
+                mongo_client.insert_one(collection_name='cmc_unlabeled_data', data=unlabeled_data)
+                
+                success_count += 1
+                pbar.set_postfix({"✅": success_count, "⏭️": skip_count, "❌": error_count}, refresh=True)
+                
+                # Sleep to avoid rate limit
+                time.sleep(60)
+                
+            except Exception as e:
+                error_count += 1
+                error_msg = str(e)
+                if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                    pbar.write(f"⚠️  Rate limit hit! Waiting 60s...")
+                else:
+                    pbar.write(f"❌ Error: {error_msg[:100]}...")
+                pbar.set_postfix({"✅": success_count, "⏭️": skip_count, "❌": error_count}, refresh=True)
+                time.sleep(60)
         
-        mongo_client.insert_one(collection_name='cmc_sentiment_data',data=data_to_store)
-        print("STORED SENTIMENT DATA:\n")
-        print(data_to_store)
-        sentiment_score = infer_sentiment(infered_policy)
-        unlabeled_data = construct_unlabeled_dataset(sentiment_score)
-        
-        mongo_client.insert_one(collection_name='cmc_unlabeled_data',data=unlabeled_data)
-        print("STORED UNLABELED DATA:\n")
-        print(unlabeled_data)
+        # Summary after batch
+        print(f"\n✅ Batch complete: {success_count} success, {skip_count} skipped, {error_count} errors\n", flush=True)
     # print(type(data))
     
     

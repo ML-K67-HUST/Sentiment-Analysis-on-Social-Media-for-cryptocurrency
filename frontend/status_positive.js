@@ -9,8 +9,8 @@ async function fetchPositiveRate() {
     const bitcoinIndexScore = lastElement.bitcoin_index_score;
     
     return {
-        rate: bitcoinIndexScore*100, // Random number between 0 and 100
-        trend: Math.random() > 0.5 // Random boolean for up/down trend
+        rate: bitcoinIndexScore, // Already a percentage (0-100)
+        trend: true // Positive sentiment trend
     };
 }
 

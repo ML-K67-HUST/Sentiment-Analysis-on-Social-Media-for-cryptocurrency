@@ -19,117 +19,97 @@ def time_ago(timestamp):
     
 
 def get_cmc_news():
-    
+    """
+    Fetch CoinMarketCap news from MongoDB and join with sentiment data.
+    """
     mongo_client = MongoManager('blog-data')
-    cmc_data = mongo_client.find(
-        collection_name='cmc_sentiment_data',
-        filter={
-            "symbol":"BTC",
-        },
-        sort=("timestamp",-1),
-        limit=10
-    )
-    cmc_data
-    # cmc_data.sort(key=lambda x:x["timestamp"],reverse=True)
-    # cmc_data
-
-    # for data in cmc_data:
-    #     print(time_ago(int(data['timestamp'])))
+    
+    # 1. Get latest news articles
+    cmc_data = list(mongo_client.find(
+        collection_name='cmc_news',
+        filter={'title': {'$exists': True, '$ne': None}},
+        sort=("timestamp", -1),
+        limit=50
+    ))
+    
+    if not cmc_data:
+        return []
+        
+    # 2. Get hash_ids to fetch sentiment
+    hash_ids = [doc.get('hash_id') for doc in cmc_data if doc.get('hash_id')]
+    
+    # 3. Fetch sentiment data
+    sentiment_map = {}
+    if hash_ids:
+        sentiments = list(mongo_client.find(
+            collection_name='cmc_sentiment_data',
+            filter={'hash_id': {'$in': hash_ids}}
+        ))
+        for s in sentiments:
+            sentiment_map[s.get('hash_id')] = s
+    
     result = []
     for data in cmc_data:
-        sentiments = []
-        for sentiment,descript in data["btc_sentiment"].items():
-            if descript["result"] == 1:
-                if "positive" in sentiment.lower():
-                    sentiments.append({
-                        "type":"Positive",
-                        "content":descript["reasoning"]
-                    })
-                elif "negative" in sentiment.lower():
-                    sentiments.append({
-                        "type":"Negative",
-                        "content":descript["reasoning"]
-                    })
-                elif "reporting" in sentiment.lower():
-                    sentiments.append({
-                        "type":"reporting",
-                        "content":descript["reasoning"]
-                    })
-                elif "manipulation" in sentiment.lower():
-                    sentiments.append({
-                        "type":"manipulate",
-                        "content":descript["reasoning"]
-                    })
+        # Extract description
+        content = data.get('content', '')
+        description = content[:260] + '...' if len(content) > 260 else content
+        
+        # Extract title
+        title = data.get('title')
+        if not title:
+            source_data = data.get('source_data')
+            if source_data:
+                if isinstance(source_data, list) and source_data:
+                    title = source_data[0].get('title')
+                elif isinstance(source_data, dict):
+                    title = source_data.get('title')
+        if not title:
+            title = 'No title'
+
+        # enrich with sentiment
+        hash_id = data.get('hash_id')
+        sentiment_record = sentiment_map.get(hash_id)
+        
+        sentiments_list = []
+        if sentiment_record:
+            # Check for 'btc_sentiment' structure (new format)
+            btc_sentiment = sentiment_record.get('btc_sentiment')
+            if btc_sentiment:
+                # Iterate over keys (metrics/policies)
+                for key, val in btc_sentiment.items():
+                    if isinstance(val, dict):
+                        sentiment_type = val.get('result', 'neutral')
+                        reasoning = val.get('reasoning', '')
+                        
+                        # Map to frontend types
+                        if 'positive' in sentiment_type.lower():
+                            fe_type = 'positive'
+                        elif 'negative' in sentiment_type.lower():
+                            fe_type = 'negative'
+                        else:
+                            fe_type = 'reporting'
+                            
+                        sentiments_list.append({
+                            "type": fe_type,
+                            "content": reasoning
+                        })
+            # Fallback/Old format check
+            elif sentiment_record.get('sentiment_score') is not None:
+                score = sentiment_record.get('sentiment_score')
+                reasoning = sentiment_record.get('sentiment_reasoning', '')
+                fe_type = 'positive' if score > 0 else 'negative' if score < 0 else 'reporting'
+                
+                sentiments_list.append({
+                    "type": fe_type,
+                    "content": reasoning or f"Sentiment Score: {score}"
+                })
+
         result.append({
-            "timestamp":time_ago(int(data["timestamp"])),
-            "title": data['source_data'][0]['title'],
-            "description": data['source_data'][0]["content"][:260]+'...',
-            "link": data['source_data'][0]["url"],
-            "sentiments":sentiments
+            "timestamp": time_ago(int(data.get("timestamp", 0))),
+            "title": title,
+            "description": description,
+            "link": data.get('url', '#'),
+            "sentiments": sentiments_list
         })
-        # print({
-        #     "timestamp":time_ago(int(data["timestamp"])),
-        #     "title": data['source_data'][0]['title'],
-        #     "description": data['source_data'][0]["content"],
-        #     "link": data['source_data'][0]["url"],
-        #     "sentiments":sentiments
-        # })
+
     return result
-    # return [
-    #     {
-    #         "timestamp": "1 hours ago",
-    #         "title": "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
-    #         "description": "The world of cryptocurrencies is in turmoil...",
-    #         "link": 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
-    #         "sentiments": [
-    #             {
-    #                 "type": "Positive",
-    #                 "content": "the article presents a reasonable and wellsubstantiated case..."
-    #             },
-    #             {
-    #                 "type": "Negative",
-    #                 "content": "the article also presents concerns about..."
-    #             }
-    #         ]
-    #     },
-    #     {
-    #         "timestamp": "1 hours ago",
-    #         "title": "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
-    #         "description": "The world of cryptocurrencies is in turmoil...",
-    #         "link": 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
-    #         "sentiments": [
-    #             {
-    #                 "type": "Negative",
-    #                 "content": "the article also presents concerns about..."
-    #             }
-    #         ]
-    #     },
-    #     {
-    #         "timestamp": "1 hours ago",
-    #         "title": "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
-    #         "description": "The world of cryptocurrencies is in turmoil...",
-    #         "link": 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
-    #         "sentiments": [
-    #             {
-    #                 "type": "Positive",
-    #                 "content": "the article presents a reasonable and wellsubstantiated case..."
-    #             }
-    #         ]
-    #     },
-    #     {
-    #         "timestamp": "1 hours ago",
-    #         "title": "Bitcoin Drops, But Forecasts Predict $118,000 Before 2025",
-    #         "description": "The world of cryptocurrencies is in turmoil...",
-    #         "link": 'https://www.facebook.com/profile.php?id=100093414754735&mibextid=wwXIfr&rdid=3OxRRw3Ij0tQJJsi&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2FjaF8Q932p8hajft7%2F%3Fmibextid%3DwwXIfr',
-    #         "sentiments": [
-    #             {
-    #                 "type": "Positive",
-    #                 "content": "the article presents a reasonable and wellsubstantiated case..."
-    #             },
-    #             {
-    #                 "type": "Negative",
-    #                 "content": "the article also presents concerns about..."
-    #             }
-    #         ]
-    #     },
-    # ]

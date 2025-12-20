@@ -1,15 +1,16 @@
 const verticalLinePlugin = {
     id: 'verticalLinePlugin',
     afterDraw: (chart) => {
-        if (chart.tooltip._active && chart.tooltip._active.length) {
+        if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
             const ctx = chart.ctx;
             const activePoint = chart.tooltip._active[0];
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(activePoint.element.x, chart.chartArea.top);
             ctx.lineTo(activePoint.element.x, chart.chartArea.bottom);
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 1; // Make the line thinner/subtle
+            ctx.strokeStyle = '#adb5bd'; // Use a gray color instead of white for better aesthetics
+            ctx.setLineDash([5, 5]); // Dashed line for better style
             ctx.stroke();
             ctx.restore();
         }
@@ -59,13 +60,33 @@ async function createChart() {
         function updateChart(filteredData) {
             const ctx = document.getElementById('bitcoinChart').getContext('2d');
 
+            // Determine appropriate time unit based on data range
+            // Determine appropriate time unit based on selected option
+            let timeUnit = 'day';
+            let displayFormat = 'MMM dd';
+
+            // Get selected option directly from DOM or passed argument
+            // But here we rely on the filteredData scope. 
+            // Better to rely on the 'time span' of data.
+            const startTime = new Date(filteredData[0].timestamp).getTime();
+            const endTime = new Date(filteredData[filteredData.length - 1].timestamp).getTime();
+            const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+            if (durationHours <= 24.5) { // Last Data (allow some buffer)
+                timeUnit = 'hour';
+                displayFormat = 'MMM dd HH:mm';
+            } else {
+                timeUnit = 'day';
+                displayFormat = 'MMM dd';
+            }
+
             const chartData = {
                 datasets: [
                     {
                         label: 'BTC price',
                         data: filteredData.map(entry => ({
                             x: entry.timestamp,
-                            y: Math.round(entry.price * 100) / 100
+                            y: entry.price ? Math.round(entry.price * 100) / 100 : null
                         })),
                         borderColor: 'rgb(255, 0, 0)',
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -73,25 +94,36 @@ async function createChart() {
                         yAxisID: 'y',
                         pointRadius: 0,
                         borderWidth: 3,
+                        spanGaps: true
                     },
                     {
                         label: 'Positive rate',
-                        data: filteredData.map(entry => ({
-                            x: entry.timestamp,
-                            y: Math.round(entry.bitcoin_index_score * 10000) / 100
-                        })),
+                        data: filteredData.map(entry => {
+                            let val = entry.bitcoin_index_score;
+                            // Safety clamp: ensure value is within 0-100 range
+                            if (val !== null) {
+                                if (val > 100) val = 100;
+                                if (val < 0) val = 0;
+                            }
+                            return {
+                                x: entry.timestamp,
+                                y: val !== null ? Math.round(val * 100) / 100 : null
+                            }
+                        }),
                         borderColor: 'rgb(0, 255, 200)',
                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
                         fill: false,
                         yAxisID: 'y1',
                         pointRadius: 0,
                         borderWidth: 3,
+                        spanGaps: false
                     },
                 ],
             };
 
             const chartOptions = {
                 responsive: true,
+                maintainAspectRatio: false, // Allow chart to fill container
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -100,7 +132,7 @@ async function createChart() {
                             boxHeight: 1,
                             padding: 15,
                             font: {
-                                size: 24 // Increased legend font size
+                                size: 14 // Decreased font size for better fit
                             },
                             color: '#adb5bd'
                         },
@@ -110,13 +142,13 @@ async function createChart() {
                         intersect: false,
                         displayColors: false,
                         titleFont: {
-                            size: 20 
+                            size: 14
                         },
                         bodyFont: {
-                            size: 20
+                            size: 14
                         },
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -143,21 +175,25 @@ async function createChart() {
                     x: {
                         type: 'time',
                         time: {
-                            unit: 'day',
-                            tooltipFormat: 'MMM dd, yyyy',
+                            unit: timeUnit,
+                            tooltipFormat: 'MMM dd, yyyy HH:mm',
                             displayFormats: {
+                                hour: 'MMM dd HH:mm',
                                 day: 'MMM dd',
+                                week: 'MMM dd',
+                                month: 'MMM yyyy'
                             },
                         },
                         grid: {
                             display: false,
                         },
                         ticks: {
-                            autoSkip: false,
+                            autoSkip: true,  // Auto-adjust labels based on available space
+                            maxTicksLimit: 8,  // Limit number of ticks for readability
                             maxRotation: 0,
                             minRotation: 0,
                             font: {
-                                size: 20 // Increased x-axis font size
+                                size: 12
                             },
                             color: '#adb5bd'
                         },
@@ -167,27 +203,30 @@ async function createChart() {
                         position: 'right',
                         ticks: {
                             font: {
-                                size: 20 // Increased y-axis font size
+                                size: 12 // Reduced font size
                             },
                             color: '#adb5bd',
-                            callback: function(value) {
+                            callback: function (value) {
                                 return Number((value / 1000).toFixed(2)) + 'k';
                             },
                         },
                     },
                     y1: {
                         type: 'linear',
+                        display: true,
                         position: 'left',
+                        min: 0,   // Explicitly set min
+                        max: 100, // Explicitly set max
                         grid: {
                             drawOnChartArea: false,
                         },
                         ticks: {
                             font: {
-                                size: 20 // Increased y1-axis font size
+                                size: 12 // Reduced font size
                             },
                             color: '#adb5bd',
-                            callback: function(value) {
-                                return Number(value.toFixed(2)) + '%';
+                            callback: function (value) {
+                                return Number(value.toFixed(0)) + '%';
                             },
                         },
                     },

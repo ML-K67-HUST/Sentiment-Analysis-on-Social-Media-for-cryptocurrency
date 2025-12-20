@@ -60,14 +60,18 @@
                 </div>
             </div>
             <div class="left-chart">
-                <label for"options">Choose a date</label>
-                <select id="options" name="options">
-                    <option value="option-1">Last day</option> 
-                    <option value="option-2">Three day ago</option> 
-                    <option value="option-3">One week ago</option> 
-                    <option value="option-4">One month ago</option> 
-                </select>
-                <canvas id="bitcoinChart"></canvas>
+                <div class="chart-controls">
+                    <label for="options" class="chart-label">Time Period:</label>
+                    <select id="options" name="options" class="chart-select">
+                        <option value="option-1">Last Day</option> 
+                        <option value="option-2">3 Days</option> 
+                        <option value="option-3">1 Week</option> 
+                        <option value="option-4">1 Month</option> 
+                    </select>
+                </div>
+                <div class="chart-container" style="position: relative; flex: 1; min-height: 0; width: 100%;">
+                    <canvas id="bitcoinChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="item right">

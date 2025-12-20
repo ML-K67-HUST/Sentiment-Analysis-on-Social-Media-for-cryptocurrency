@@ -1,7 +1,177 @@
-airflow/.env
-backend/.env
-kafka/.env
-venv
-airflow/logs
-airflow/plugins
-mlflow/.env
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# ============================================
+# Node.js / Frontend
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.npm
+.eslintcache
+
+# ============================================
+# Environment & Secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# API Keys & Credentials
+*_secrets.json
+*_credentials.json
+cookies.txt
+*.cookies.json
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+*.log.*
+
+# Airflow logs
+airflow/logs/
+airflow/dags/__pycache__/
+
+# ============================================
+# Data & Databases
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+data/
+*.csv
+*.json
+!package.json
+!package-lock.json
+
+# MongoDB dumps
+dump/
+
+# Kafka data
+kafka-data/
+kafka/kafka-data/
+
+# ============================================
+# ML & Artifacts
+# ============================================
+mlruns/
+mlflow/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+model_checkpoints/
+*.model
+artifacts/
+
+# ============================================
+# macOS
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ============================================
+# Linux
+# ============================================
+*~
+.nfs*
+
+# ============================================
+# Windows
+# ============================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+
+# ============================================
+# Testing
+# ============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ============================================
+# Documentation (generated)
+# ============================================
+site/
+.mkdocs_cache/
+
+# ============================================
+# Project Specific
+# ============================================
+# Archive of old documentation (keep in git for history)
+# docs/archive/
+
+# Backend notebooks (development only)
+backend/notebook/
+backend/mlruns/
+
+# Frontend temporary data
+frontend/data_*.json
+
+# MinIO data
+minio-data/

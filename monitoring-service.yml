@@ -1,0 +1,25 @@
+# Consumer Monitoring Service
+  backend-monitoring:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sentiman_backend:latest
+    container_name: sentiman_monitoring
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "8003:8003"
+    environment:
+      MONGODB_CONNECTION_STRING: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-blog-data}
+    command: python -m uvicorn services.monitoring_api:app --host 0.0.0.0 --port 8003
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8003/')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

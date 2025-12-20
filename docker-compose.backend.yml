@@ -1,0 +1,139 @@
+# Backend Services (API, Consumers, ML)
+# Usage: docker-compose -f docker-compose.base.yml -f docker-compose.backend.yml up -d
+
+volumes:
+  nltk_data:
+
+services:
+  # ML API Service
+  backend-ml-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sentiman_backend:latest
+    container_name: sentiman_backend_ml
+    restart: unless-stopped
+    working_dir: /src
+    command: python -m uvicorn services.ml_api:app --host 0.0.0.0 --port 8002
+    ports:
+      - "8002:8002"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MONGODB_CONNECTION_STRING: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-blog-data}
+    volumes:
+      - ./airflow/dags/services/scaler.pkl:/src/services/scaler.pkl
+      - ./airflow/dags/services/tfidf_vectorizer.pkl:/src/services/tfidf_vectorizer.pkl
+      - ./airflow/dags/services/scaler_30min.pkl:/src/services/scaler_30min.pkl
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8002/')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # LLM Sentiment Consumer (Separate Service)
+  backend-llm-consumer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sentiman_backend:latest
+    container_name: sentiman_llm_consumer
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      MONGODB_CONNECTION_STRING: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-blog-data}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-coinmarketcap-news}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS}
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY}
+      COINRANKING_API_KEY: ${COINRANKING_API_KEY:?COINRANKING_API_KEY is required}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      PYTHONUNBUFFERED: "1"
+    command: python llm_consumer.py
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import sys; sys.exit(0)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # NLP Feature Engineering Consumer
+  backend-nlp-consumer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sentiman_backend:latest
+    container_name: sentiman_nlp_consumer
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      MONGODB_CONNECTION_STRING: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-blog-data}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-coinmarketcap-news}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      NLTK_DATA: /usr/local/share/nltk_data
+      PYTHONUNBUFFERED: "1"
+    command: python nlp_consumer.py
+    volumes:
+      - nltk_data:/usr/local/share/nltk_data
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import sys; sys.exit(0)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Main API Service
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: sentiman_backend:latest
+    container_name: sentiman_backend_api
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_CONNECTION_STRING: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-blog-data}
+      COINRANKING_API_KEY: ${COINRANKING_API_KEY:?COINRANKING_API_KEY is required}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY}
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    command: uvicorn services.api:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

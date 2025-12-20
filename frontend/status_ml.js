@@ -1,6 +1,7 @@
 async function fetchMLPrediction() {
     try {
-        const response = await fetch("http://localhost:8002/predict", {
+        // Call backend API which will handle ML prediction
+        const response = await fetch("http://localhost:8000/ml_predict/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -13,10 +14,10 @@ async function fetchMLPrediction() {
         }
         
         const data = await response.json();
-        console.log('Fetched prediction : ', data.prediction)
+        console.log('Fetched ML prediction data:', data);
         return data.prediction; 
     } catch (error) {
-        console.error("Failed to fetch prediction:", error);
+        console.error("Failed to fetch ML prediction:", error);
         throw error;
     }
 }

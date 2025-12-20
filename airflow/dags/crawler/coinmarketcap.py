@@ -120,7 +120,9 @@ def article_content_of_cmc_(url, title, date, symbol, category):
             "content": content,
             "timestamp": datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),
             "hash_id": hash_id,
-            "category": category
+            "_id": hash_id,
+            "category": category,
+            "crawled_at": int(datetime.utcnow().timestamp())  # When article was crawled (unix timestamp)
         }
         # print(f"Finished article {url}")
 
@@ -148,7 +150,9 @@ def article_content_of_other_(url, title, date, symbol, category):
             "symbol": symbol,
             "timestamp": datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ").timestamp(),
             "hash_id": hash_id,
-            "category": category
+            "_id": hash_id,
+            "category": category,
+            "crawled_at": int(datetime.utcnow().timestamp())  # When article was crawled
         }
         # print(f"Finished article {url}")
 

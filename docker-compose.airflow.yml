@@ -1,0 +1,210 @@
+# Airflow Stack (Workflow Orchestration)
+# Usage: docker-compose -f docker-compose.base.yml -f docker-compose.airflow.yml up -d
+
+volumes:
+  postgres_data:
+  airflow_logs:
+  airflow_plugins:
+
+services:
+  airflow-postgres:
+    image: postgres:15
+    container_name: sentiman_airflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+  airflow-redis:
+    image: redis:latest
+    container_name: sentiman_airflow_redis
+    restart: unless-stopped
+    expose:
+      - 6379
+    networks:
+      - sentiman-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+
+  airflow-init:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    image: sentiman_airflow:latest
+    container_name: sentiman_airflow_init
+    depends_on:
+      airflow-postgres:
+        condition: service_healthy
+      airflow-redis:
+        condition: service_healthy
+    environment: &airflow-common-env
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD:-airflow}
+      URL_MONGODB: ${MONGODB_CONNECTION_STRING:-mongodb://admin:password@mongodb:27017}
+      DB_NAME_ORAICHAIN: ${MONGODB_DATABASE:-blog-data}
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY}
+      COINRANKING_API_KEY: ${COINRANKING_API_KEY}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        chown -R "${AIRFLOW_UID:-50000}:0" /opt/airflow/{logs,dags,plugins}
+        exec /entrypoint airflow version
+    networks:
+      - sentiman-net
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    image: sentiman_airflow:latest
+    container_name: sentiman_airflow_webserver
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    command: webserver
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *airflow-common-env
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    networks:
+      - sentiman-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    image: sentiman_airflow:latest
+    container_name: sentiman_airflow_scheduler
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    command: scheduler
+    environment:
+      <<: *airflow-common-env
+      AIRFLOW__SCHEDULER__MAX_THREADS: 2
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    networks:
+      - sentiman-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  airflow-worker:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    image: sentiman_airflow:latest
+    container_name: sentiman_airflow_worker
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    command: celery worker --concurrency 2
+    environment:
+      <<: *airflow-common-env
+      DUMB_INIT_SETSID: "0"
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: 2
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    networks:
+      - sentiman-net
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
