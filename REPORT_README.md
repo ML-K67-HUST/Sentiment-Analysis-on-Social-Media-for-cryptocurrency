@@ -25,6 +25,8 @@ Hệ thống được thiết kế theo kiến trúc **Event-Driven Microservice
     -   **Backend API (FastAPI):** Cung cấp API `/chart/` trả về dữ liệu lịch sử (30 ngày) kết hợp với dữ liệu realtime.
     -   **Frontend:** Hiển thị Dashboard với biểu đồ tương tác, tin tức sentiment thời gian thực.
 
+![Giao diện Dashboard hoàn thiện](asset/UIUX.png)
+
 ---
 
 ## 2. Timeline & Các Công Việc Đã Hoàn Thành
