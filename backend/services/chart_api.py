@@ -99,7 +99,12 @@ def get_chart_data():
             # But if it's explicitly 0 due to no data, maybe we should indicate that?
             # For now, map standardly.
             llm_sentiment = agg.get('llm_sentiment_avg', 0.0)
-            # Safety clamp for bad data
+            
+            # Handle legacy data that was multiplied by 100 (e.g. 20.0 instead of 0.2)
+            if abs(llm_sentiment) > 1.0:
+                llm_sentiment = llm_sentiment / 100.0
+                
+            # Final safety clamp
             llm_sentiment = max(-1.0, min(1.0, llm_sentiment))
             
             positive_rate = ((llm_sentiment + 1) / 2) * 100
