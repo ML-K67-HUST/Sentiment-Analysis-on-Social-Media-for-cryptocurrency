@@ -155,7 +155,7 @@ def _infer_policy_gemini(text: str) -> dict:
             continue
     
     # All keys exhausted
-    return {}
+    raise Exception("ALL_KEYS_EXHAUSTED")
 
 
 def _infer_policy_together(text: str) -> dict:

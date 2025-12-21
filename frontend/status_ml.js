@@ -12,10 +12,10 @@ async function fetchMLPrediction() {
         if (!response.ok) {
             throw new Error(`Error: ${response.status} - ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         console.log('Fetched ML prediction data:', data);
-        return data.prediction; 
+        return data;
     } catch (error) {
         console.error("Failed to fetch ML prediction:", error);
         throw error;
@@ -28,10 +28,16 @@ async function updateMLPrediction() {
         const data = await fetchMLPrediction();
         console.log("Fetched prediction");
         const predictElement = document.querySelector('.predict');
-        
-        predictElement.textContent = `${data.toFixed(2)}%`;
-        
-        if (data > 0) {
+
+        predictElement.textContent = `${data.prediction.toFixed(2)}%`;
+
+        // Update last training time if available
+        const timeElement = document.getElementById('ml-train-time');
+        if (timeElement && data.last_train_time) {
+            timeElement.textContent = `Latest training time : ${data.last_train_time}`;
+        }
+
+        if (data.prediction > 0) {
             predictElement.className = 'predict up';
         } else {
             predictElement.className = 'predict down';

@@ -77,7 +77,9 @@ def get_chart_data():
                     'llm_confidence': 0
                 })
 
-        # 2. Add Aggregation points (High resolution)
+        # 2. Add Aggregation points (High resolution) with Moving Average
+        sentiment_buffer = [] # Buffer for SMA-6 (1 hour)
+        
         for agg in aggregations:
             # Get price for this date
             price = agg.get('btc_price')
@@ -88,33 +90,40 @@ def get_chart_data():
                 date_key = window_datetime.strftime('%Y-%m-%d')
                 price = btc_prices.get(date_key, None)
             
-            # If still no price, skip or use 0? Better to skip if we want a continuous line?
-            # Or assume previous price? 
             if price is None:
                 continue
             
             # LLM sentiment (already -1 to 1)
-            # Convert to 0-100% for chart display
-            # If sentiment is 0.0 (neutral/unknown), it maps to 50%.
-            # But if it's explicitly 0 due to no data, maybe we should indicate that?
-            # For now, map standardly.
             llm_sentiment = agg.get('llm_sentiment_avg', 0.0)
             
-            # Handle legacy data that was multiplied by 100 (e.g. 20.0 instead of 0.2)
+            # Handle legacy data that was multiplied by 100
             if abs(llm_sentiment) > 1.0:
                 llm_sentiment = llm_sentiment / 100.0
                 
-            # Final safety clamp
+            # Safety clamp for raw value before buffer
             llm_sentiment = max(-1.0, min(1.0, llm_sentiment))
             
-            positive_rate = ((llm_sentiment + 1) / 2) * 100
+            # Add to buffer and calculate SMA
+            sentiment_buffer.append(llm_sentiment)
+            if len(sentiment_buffer) > 6:
+                sentiment_buffer.pop(0)
+            
+            # Calculate Moving Average
+            # If we don't have enough data yet (start of chart), average whatever we have
+            if sentiment_buffer:
+                sma_sentiment = sum(sentiment_buffer) / len(sentiment_buffer)
+            else:
+                sma_sentiment = llm_sentiment
+
+            # Calculate Positive Rate from SMA
+            positive_rate = ((sma_sentiment + 1) / 2) * 100
             
             chart_data.append({
                 'timestamp': agg['window_datetime'],
                 'price': price,
                 'bitcoin_index_score': round(positive_rate, 2),
                 'num_articles': agg.get('num_articles', 0),
-                'llm_sentiment': round(llm_sentiment, 4),
+                'llm_sentiment': round(sma_sentiment, 4), # Return SMA instead of raw
                 'llm_confidence': round(agg.get('llm_confidence_avg', 0.0), 4)
             })
         

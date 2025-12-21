@@ -86,7 +86,7 @@ services:
       MLFLOW_S3_IGNORE_TLS: 'true'
     command: >
       mlflow server
-      --backend-store-uri postgresql://${MLFLOW_POSTGRES_USER:-mlflow}:${MLFLOW_POSTGRES_PASSWORD:-mlflow123}@mlflow-postgres:5432/${MLFLOW_POSTGRES_DB:-mlflow}
+      --backend-store-uri postgresql://${MLFLOW_POSTGRES_USER:-mlflow}:${MLFLOW_POSTGRES_PASSWORD:-mlflow123}@sentiman_mlflow_postgres:5432/${MLFLOW_POSTGRES_DB:-mlflow}
       --host 0.0.0.0
       --port 5000
       --serve-artifacts

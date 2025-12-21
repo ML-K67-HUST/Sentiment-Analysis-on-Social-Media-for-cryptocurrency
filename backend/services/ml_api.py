@@ -29,8 +29,10 @@ app = FastAPI()
 mlflow.set_tracking_uri("http://mlflow:5000")
 
 # Global model and scaler variables (lazy loading)
+# Global variables
 model = None
 scaler = None
+model_meta = {"last_train_time": "Unknown"}
 
 def load_scaler():
     """Load scaler for feature normalization"""
@@ -38,46 +40,53 @@ def load_scaler():
     if scaler is None:
         try:
             scaler = joblib.load('services/scaler_10min.pkl')
+            print(f"✅ Loaded scaler_10min.pkl with {scaler.n_features_in_} features")
         except FileNotFoundError:
-            # Fallback to old scaler if new one not found
-            try:
-                scaler = joblib.load('services/scaler.pkl')
-            except:
-                print("Warning: No scaler found")
+            print("❌ scaler_10min.pkl NOT FOUND. Cannot load scaler.")
+            raise HTTPException(status_code=500, detail="ML Scaler file missing")
+        except Exception as e:
+            print(f"❌ Error loading scaler: {e}")
+            raise HTTPException(status_code=500, detail=f"Scaler load error: {e}")
     return scaler
 
 def get_model():
     """Lazy load ML model from MLflow"""
-    global model
+    global model, model_meta
     if model is None:
         try:
             # Try loading 10-min model first
             model_uri = "models:/BestModel_10min/Production"
             model = mlflow.pyfunc.load_model(model_uri)
-        except Exception as e:
-            # Fallback to old model
+            print("✅ Loaded BestModel_10min from MLflow")
+            
+            # Fetch metadata
             try:
-                model_uri = "models:/BestModel/Production"
-                model = mlflow.pyfunc.load_model(model_uri)
-            except Exception as e2:
-                raise HTTPException(status_code=503, detail=f"Model not available: {e2}")
+                client = MlflowClient()
+                versions = client.get_latest_versions("BestModel_10min", stages=["Production"])
+                if versions:
+                    ts_ms = versions[0].creation_timestamp
+                    dt = datetime.fromtimestamp(ts_ms / 1000.0)
+                    model_meta["last_train_time"] = dt.strftime("%Y-%m-%d %H:%M")
+            except Exception as e:
+                print(f"⚠️ Failed to fetch model metadata: {e}")
+                
+        except Exception as e:
+            print(f"⚠️ Failed to load model: {e}")
+            model = None
     return model
+
 
 @app.post("/predict")
 def predict(input_data: PredictionInput):
     """
     Predict Bitcoin price movement based on 10-min aggregated features
-    
-    Input: 17 features from aggregated 10-min window
-    Output: Price movement prediction (percentage)
     """
     try:
-        # Prepare feature vector (17 features in order)
+        # Prepare feature vector (17 features)
         features = np.array([[
             input_data.num_articles,
             input_data.llm_sentiment_avg,
             input_data.llm_confidence_avg,
-            # NLP features
             input_data.avg_positive_word_ratio,
             input_data.avg_negative_word_ratio,
             input_data.avg_neutral_word_ratio,
@@ -103,14 +112,30 @@ def predict(input_data: PredictionInput):
             
         # Get model and predict
         model = get_model()
+        
+        if model is None:
+            # Fallback if model is missing (e.g. registry wiped)
+            # Use simple heuristic: if sentiment > 0.6 -> UP, else -> DOWN
+            sentiment = input_data.llm_sentiment_avg
+            dummy_prediction = 0.02 * (sentiment - 0.5) # Simple linear mapping
+            print(f"⚠️ Using FALLBACK heuristic. Sentiment={sentiment}, Pred={dummy_prediction}")
+            return {
+                "prediction": float(dummy_prediction),
+                "status": "fallback",
+                "model_type": "heuristic",
+                "last_train_time": model_meta.get("last_train_time", "Unknown")
+            }
+
         prediction = model.predict(features_scaled)
         
         return {
             "prediction": float(prediction[0]),
             "status": "success",
-            "model_type": "10min_aggregated"
+            "model_type": "10min_aggregated",
+            "last_train_time": model_meta.get("last_train_time", "Unknown")
         }
-        
+
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 

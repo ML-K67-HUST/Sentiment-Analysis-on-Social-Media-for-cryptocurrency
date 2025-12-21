@@ -65,8 +65,21 @@ while True:
                 symbol = record['symbol']
                 content = record['content']
                 
-                # Call LLM for sentiment
-                infered_policy = infer_policy(content)
+                # Call LLM for sentiment with retry logic
+                infered_policy = {}
+                while True:
+                    try:
+                        infered_policy = infer_policy(content)
+                        break
+                    except Exception as e:
+                        if "ALL_KEYS_EXHAUSTED" in str(e):
+                            pbar.write(f"⚠️  Rate limit (ALL KEYS): Waiting 30s before retry...")
+                            time.sleep(30)
+                            continue
+                        else:
+                            # Other errors (e.g. content policy violation, API error) -> Skip
+                            pbar.write(f"❌ Inference Error: {e}")
+                            break
                 
                 if not infered_policy:
                     error_count += 1

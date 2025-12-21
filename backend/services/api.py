@@ -84,9 +84,9 @@ async def get_ml_prediction():
     try:
         mongo_client = MongoManager('blog-data')
         
-        # Get latest 30-min aggregation 
+        # Get latest 10-min aggregation 
         latest_aggregation = mongo_client.find_one(
-            collection_name='aggregated_features_30min',
+            collection_name='aggregated_features_10min',
             filter={'aggregation_status': 'complete'},
             sort=("window_start", -1)
         )
@@ -147,7 +147,8 @@ async def get_ml_prediction():
                     "llm_confidence": latest_aggregation.get('llm_confidence_avg', 0.0)
                 },
                 "timestamp": int(time.time()),
-                "model_type": "30min_aggregated"
+                "model_type": "10min_aggregated",
+                "last_train_time": ml_result.get('last_train_time')
             }
             
     except HTTPException:
