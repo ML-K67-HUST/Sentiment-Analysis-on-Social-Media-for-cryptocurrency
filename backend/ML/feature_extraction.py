@@ -1,13 +1,8 @@
-"""
-Feature Extraction for Text Classification
-TF-IDF vectorization with preprocessing
-"""
 import re
 import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 
-# Download required NLTK data (run once)
 try:
     nltk.data.find('corpora/stopwords')
 except LookupError:

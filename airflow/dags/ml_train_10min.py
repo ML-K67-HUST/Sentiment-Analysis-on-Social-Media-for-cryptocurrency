@@ -118,8 +118,15 @@ def train_models(**context):
     """Train multiple regression models and log to MLflow"""
     
     # Get data from XCom
-    X = np.array(context['ti'].xcom_pull(key='X', task_ids='extract_data'))
-    y = np.array(context['ti'].xcom_pull(key='y', task_ids='extract_data'))
+    x_data = context['ti'].xcom_pull(key='X', task_ids='extract_data')
+    y_data = context['ti'].xcom_pull(key='y', task_ids='extract_data')
+    
+    if not x_data or not y_data:
+        print("⚠️ No data received from extract_data task. Skipping training.")
+        return "skipped"
+    
+    X = np.array(x_data)
+    y = np.array(y_data)
     
     print(f"🤖 Training models on {len(X)} samples with {X.shape[1]} features...")
     
@@ -127,6 +134,23 @@ def train_models(**context):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
+
+    # --- SUBMISSION REQUIREMENT: Save Dataset Splits ---
+    print("💾 Saving dataset splits for submission...")
+    df_train = pd.DataFrame(X_train, columns=FEATURE_COLS)
+    df_train['target'] = y_train
+    
+    df_test = pd.DataFrame(X_test, columns=FEATURE_COLS)
+    df_test['target'] = y_test
+    
+    os.makedirs('/tmp/submission_data', exist_ok=True)
+    train_path = '/tmp/submission_data/train_set.csv'
+    test_path = '/tmp/submission_data/test_set.csv'
+    
+    df_train.to_csv(train_path, index=False)
+    df_test.to_csv(test_path, index=False)
+    print(f"✅ Saved train_set.csv ({len(df_train)}) and test_set.csv ({len(df_test)})")
+    # ----------------------------------------------------
     
     # Scale features
     scaler = MinMaxScaler()
@@ -138,27 +162,93 @@ def train_models(**context):
     joblib.dump(scaler, '/tmp/scaler.pkl')
     print("✅ Scaler saved to /tmp/scaler.pkl")
     
+    # Set MLflow tracking URI
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
+    
     # Set MLflow experiment
     mlflow.set_experiment(EXPERIMENT_NAME)
     
-    # Train models
-    models = {
-        'LinearRegression': LinearRegression(),
-        'RandomForest': RandomForestRegressor(n_estimators=100, random_state=42),
-        'GradientBoosting': GradientBoostingRegressor(n_estimators=100, random_state=42)
+    # Import for Learning Curve & Tuning
+    from sklearn.model_selection import learning_curve, GridSearchCV
+    from sklearn.dummy import DummyRegressor
+    import matplotlib.pyplot as plt
+    try:
+        import wandb
+    except ImportError:
+        wandb = None
+        print("⚠️ WandB not found. Skipping WandB logging.")
+
+    # Define models with parameter grids for tuning
+    # We only tune Random Forest to save time, others use defaults
+    models_config = {
+        'Baseline_Dummy': {
+            'model': DummyRegressor(strategy='mean'),
+            'params': {}
+        },
+        'LinearRegression': {
+            'model': LinearRegression(),
+            'params': {}
+        },
+        'RandomForest': {
+            'model': RandomForestRegressor(random_state=42),
+            'params': {
+                'n_estimators': [50, 100],
+                'max_depth': [None, 10, 20],
+                'min_samples_split': [2, 5]
+            }
+        },
+        'GradientBoosting': {
+            'model': GradientBoostingRegressor(random_state=42),
+            'params': {
+                'n_estimators': [100],
+                'learning_rate': [0.1],
+                'max_depth': [3]
+            }
+        }
     }
     
     results = []
     
-    for name, model in models.items():
+    # Initialize WandB Run (Global for this DAG run, or per model? Let's do per model or 1 run)
+    # Using 1 WandB run for the whole experiment to compare models in one dashboard is better, 
+    # but MLflow logic loops. Let's start a WandB run at start.
+    if wandb:
+        try:
+            wandb.login(key=os.getenv("WANDB_API_KEY"))
+            run = wandb.init(project="bitcoin_price_prediction_10min", reinit=True, name=f"run_{datetime.now().strftime('%Y%m%d_%H%M')}")
+        except Exception as e:
+            print(f"⚠️ WandB Init Failed: {e}")
+            wandb = None
+
+    for name, config in models_config.items():
         with mlflow.start_run(run_name=f"{name}_{datetime.now().strftime('%Y%m%d_%H%M')}"):
             print(f"\n🔧 Training {name}...")
             
-            # Train
-            model.fit(X_train_scaled, y_train)
+            base_model = config['model']
+            param_grid = config['params']
+            
+            # --- FEATURE: Hyperparameter Tuning (GridSearch) ---
+            if param_grid:
+                print(f"   🔎 Tuning hyperparameters for {name}...")
+                grid_search = GridSearchCV(base_model, param_grid, cv=3, scoring='neg_mean_absolute_error', n_jobs=-1)
+                grid_search.fit(X_train_scaled, y_train)
+                
+                best_model = grid_search.best_estimator_
+                best_params = grid_search.best_params_
+                print(f"   ✨ Best Params: {best_params}")
+                
+                # Log best params
+                for param, value in best_params.items():
+                    mlflow.log_param(f"best_{param}", value)
+                    if wandb: wandb.log({f"{name}_best_{param}": value})
+            else:
+                best_model = base_model
+                best_model.fit(X_train_scaled, y_train)
+                best_params = {}
+            # ----------------------------------------------------
             
             # Predict
-            y_pred = model.predict(X_test_scaled)
+            y_pred = best_model.predict(X_test_scaled)
             
             # Evaluate
             mae = mean_absolute_error(y_test, y_pred)
@@ -169,6 +259,48 @@ def train_models(**context):
             print(f"   MSE: {mse:.4f}")
             print(f"   R²:  {r2:.4f}")
             
+            # --- SUBMISSION REQUIREMENT: Generate Learning Curve ---
+            print(f"📊 Generating Learning Curve for {name}...")
+            try:
+                train_sizes, train_scores, test_scores = learning_curve(
+                    best_model, X_train_scaled, y_train, cv=5, scoring='neg_mean_absolute_error',
+                    n_jobs=-1, train_sizes=np.linspace(0.1, 1.0, 5)
+                )
+                
+                train_scores_mean = -np.mean(train_scores, axis=1)
+                test_scores_mean = -np.mean(test_scores, axis=1)
+
+                plt.figure()
+                plt.title(f"Learning Curve: {name}")
+                plt.xlabel("Training examples")
+                plt.ylabel("MAE Score (Lower is better)")
+                plt.grid()
+                
+                plt.plot(train_sizes, train_scores_mean, 'o-', color="r", label="Training score")
+                plt.plot(train_sizes, test_scores_mean, 'o-', color="g", label="Cross-validation score")
+                
+                plt.legend(loc="best")
+                plot_path = f'/tmp/submission_data/learning_curve_{name}.png'
+                plt.savefig(plot_path)
+                plt.close()
+                print(f"✅ Saved Learning Curve plot to {plot_path}")
+                mlflow.log_artifact(plot_path)
+                
+                # Log to WandB
+                if wandb:
+                    wandb.log({f"{name}_learning_curve": wandb.Image(plot_path)})
+                    
+                    # Log metrics
+                    wandb.log({
+                        f"{name}_mae": mae,
+                        f"{name}_mse": mse,
+                        f"{name}_r2": r2
+                    })
+                
+            except Exception as e:
+                print(f"⚠️ Failed to generate learning curve: {e}")
+            # --------------------------------------------------------
+
             # Log to MLflow
             mlflow.log_param("model_type", name)
             mlflow.log_param("n_samples", len(X))
@@ -178,10 +310,14 @@ def train_models(**context):
             mlflow.log_metric("r2_score", r2)
             
             # Log model
-            mlflow.sklearn.log_model(model, "model")
+            mlflow.sklearn.log_model(best_model, "model")
             
             # Log scaler
             mlflow.log_artifact('/tmp/scaler.pkl')
+            
+            # Log Datasets
+            mlflow.log_artifact(train_path)
+            mlflow.log_artifact(test_path)
             
             results.append({
                 'name': name,
@@ -189,6 +325,34 @@ def train_models(**context):
                 'run_id': mlflow.active_run().info.run_id
             })
     
+    
+    # ... (Previous imports)
+    
+    # Import TensorFlow for LSTM
+    try:
+        import tensorflow as tf
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import LSTM, Dense, Dropout
+        print(f"✅ TensorFlow {tf.__version__} imported")
+        HAS_TF = True
+    except ImportError:
+        print("⚠️ TensorFlow not found. LSTM will be skipped.")
+        HAS_TF = False
+        
+    # Helper to prepare sequences for LSTM
+    def create_sequences(X_data, y_data, time_steps=6):
+        Xs, ys = [], []
+        for i in range(len(X_data) - time_steps):
+            Xs.append(X_data[i:(i + time_steps)])
+            ys.append(y_data[i + time_steps])
+        return np.array(Xs), np.array(ys)
+
+    # ... (Inside train_models loop)
+
+    
+    if wandb:
+        wandb.finish()
+
     # Find best model
     best_result = min(results, key=lambda x: x['mae'])
     
@@ -202,6 +366,9 @@ def train_models(**context):
 
 def register_best_model(**context):
     """Register best model to MLflow Model Registry"""
+    
+    # Set MLflow tracking URI explicitly
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
     
     best_run_id = context['ti'].xcom_pull(key='best_run_id', task_ids='train_and_evaluate_models')
     best_model_name = context['ti'].xcom_pull(key='best_model_name', task_ids='train_and_evaluate_models')

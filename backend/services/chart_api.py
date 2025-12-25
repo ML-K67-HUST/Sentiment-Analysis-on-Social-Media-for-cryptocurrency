@@ -4,20 +4,40 @@ from datetime import datetime, timedelta
 from database.mongodb import MongoManager
 
 
+
 def get_bitcoin_history(days=30):
-    """Fetch Bitcoin price history from CoinGecko"""
+    """Fetch Bitcoin price history from CoinGecko (Hourly resolution)"""
     try:
-        url = f"https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days={days}&interval=daily"
+        # Remove interval=daily to get granular data (hourly for > 1 day, minutely for 1 day)
+        url = f"https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days={days}"
         response = requests.get(url, timeout=10)
         data = response.json()
         prices = data.get('prices', [])
+        
+        # Return dict: timestamp (seconds) -> price
+        # CoinGecko returns [timestamp_ms, price]
         return {
-            datetime.fromtimestamp(p[0]/1000).strftime('%Y-%m-%d'): p[1] 
+            int(p[0]/1000): p[1] 
             for p in prices
         }
     except Exception as e:
         print(f"Error fetching BTC history: {e}")
         return {}
+
+def get_closest_price(target_ts, price_history):
+    """Find the price record with timestamp closest to target_ts"""
+    if not price_history:
+        return None
+    
+    # This is a naive O(N) search per point, but fast enough for small N (720 hours)
+    # For production, use bisect or a sorted list matching
+    closest_ts = min(price_history.keys(), key=lambda t: abs(t - target_ts))
+    
+    # Only use if within reasonable range (e.g. 2 hours)
+    if abs(closest_ts - target_ts) > 7200: 
+        return None
+        
+    return price_history[closest_ts]
 
 def get_chart_data():
     """
@@ -30,7 +50,7 @@ def get_chart_data():
         # Get 10-min aggregations from last 30 days
         thirty_days_ago = int((datetime.now() - timedelta(days=30)).timestamp())
         
-        # Fetch real BTC price history
+        # Fetch real BTC price history (Hourly resolution)
         btc_prices = get_bitcoin_history(30)
         
         # Get aggregated features
@@ -50,45 +70,17 @@ def get_chart_data():
         # Merge with price data
         chart_data = []
         
-        # 1. Add historical daily points (for context) when aggregation is missing
-        # We know btc_prices keys are 'YYYY-MM-DD'
-        sorted_dates = sorted(btc_prices.keys())
-        
-        # Helper to check if a date is already covered by aggregations (roughly)
-        # Actually, aggregations are high-res (10 min). Daily points are low-res.
-        # We can just add all daily points that correspond to timestamps OLDER than our oldest aggregation.
-        
-        oldest_agg_ts = aggregations[0]['window_start'] if aggregations else int(datetime.now().timestamp())
-        
-        for date_str in sorted_dates:
-            price = btc_prices[date_str]
-            dt = datetime.strptime(date_str, '%Y-%m-%d')
-            ts = int(dt.timestamp())
-            
-            # If this daily point is significantly older than our first aggregation, add it as a historical point
-            # timestamp is isoformat for consistency with agg 'window_datetime'
-            if ts < oldest_agg_ts - 86400: # Keep daily points distinct from recent high-res data
-                 chart_data.append({
-                    'timestamp': dt.isoformat(),
-                    'price': price,
-                    'bitcoin_index_score': None, # No sentiment for history
-                    'num_articles': 0,
-                    'llm_sentiment': 0,
-                    'llm_confidence': 0
-                })
-
         # 2. Add Aggregation points (High resolution) with Moving Average
         sentiment_buffer = [] # Buffer for SMA-6 (1 hour)
         
         for agg in aggregations:
-            # Get price for this date
+            # 1. Try to get Price from record itself
             price = agg.get('btc_price')
             
-            # Fallback to daily history if price is missing or 0 (for old records)
+            # 2. If missing, look up closest hourly price from CoinGecko
             if not price:
-                window_datetime = datetime.fromisoformat(agg['window_datetime'])
-                date_key = window_datetime.strftime('%Y-%m-%d')
-                price = btc_prices.get(date_key, None)
+                window_ts = agg.get('window_start')
+                price = get_closest_price(window_ts, btc_prices)
             
             if price is None:
                 continue
@@ -109,7 +101,6 @@ def get_chart_data():
                 sentiment_buffer.pop(0)
             
             # Calculate Moving Average
-            # If we don't have enough data yet (start of chart), average whatever we have
             if sentiment_buffer:
                 sma_sentiment = sum(sentiment_buffer) / len(sentiment_buffer)
             else:
@@ -123,7 +114,7 @@ def get_chart_data():
                 'price': price,
                 'bitcoin_index_score': round(positive_rate, 2),
                 'num_articles': agg.get('num_articles', 0),
-                'llm_sentiment': round(sma_sentiment, 4), # Return SMA instead of raw
+                'llm_sentiment': round(sma_sentiment, 4), 
                 'llm_confidence': round(agg.get('llm_confidence_avg', 0.0), 4)
             })
         

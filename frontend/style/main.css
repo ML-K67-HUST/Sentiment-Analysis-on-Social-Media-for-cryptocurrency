@@ -50,6 +50,7 @@ height: 100%;
 margin: 0;
 padding: 0;
 overflow: hidden; /* Prevents scrolling */
+transition: background-color 0.3s ease, color 0.3s ease;
 }
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
 @media (prefers-reduced-motion: reduce) {
@@ -66,26 +67,69 @@ html:focus-within {
 }
 }
 
-/* Go  */
+/* Global Variables */
 :root {
     --main-font: 'Poppins', sans-serif;
     --second-font: 'Montserrat', sans-serif;
     --third-font: 'Montserrat Alternates', sans-serif;
+
+    /* Dark Mode (Default) */
+    --bg-primary: black;
+    --bg-secondary: #0d0d0d;
+    --bg-card: black;
+    --bg-card-hover: #12131A;
+    --bg-nav: black;
+    --bg-input: #263344;
+    --bg-positive-box: rgba(8, 28, 21, 0.6);
+    --bg-news-nav: #191D26;
+
+    --text-primary: white;
+    --text-secondary: #adb5bd;
+    --text-muted: #9CA3AF;
+    --text-abbre: #6c757d;
+
+    --border-color: #191D26;
+    --border-highlight: #05DBAC;
+    
+    --shadow-color: rgba(0,0,0,0.5);
 }
+
+body.light-mode {
+    /* Light Mode */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #e9ecef;
+    --bg-nav: #ffffff;
+    --bg-input: #e9ecef; /* or white with border */
+    --bg-positive-box: rgba(5, 219, 172, 0.15); /* Light Green */
+    --bg-news-nav: #e9ecef;
+
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-muted: #868e96;
+    --text-abbre: #adb5bd;
+
+    --border-color: #dee2e6;
+    --border-highlight: #0cc9a1;
+
+    --shadow-color: rgba(0,0,0,0.1);
+}
+
 /* nav */ 
 .nav {
-    background-color: black;
+    background-color: var(--bg-nav);
     width: 100%;
     height: 90px;
     padding: 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+    border-bottom: 1px solid var(--border-color); /* Added border for light mode separation */
 }
 
 .nav a {
-    color: white;
+    color: var(--text-primary);
     text-decoration: none;
     padding-left: 4rem;
     font-family: var(--second-font);
@@ -94,17 +138,16 @@ html:focus-within {
 }
 
 .nav p {
-    color: white;
+    color: var(--text-primary);
     font-family: var(--second-font);
     font-size: 28px;
     font-weight: 500;
-    padding-right: 4rem;
-    
+    /* padding-right: 4rem; Removed to make space for button logic in HTML */
 }
 
 /* main */
 .main { 
-    background-color: black;
+    background-color: var(--bg-primary);
     width: 100%;
     height: 100%;
     display: grid;
@@ -119,9 +162,9 @@ html:focus-within {
 .left {
     grid-row: 1 / 2;
     grid-column: 1 / 3;
-    background-color: black;
-    border-right: 0.5px solid #191D26;
-    border-top: 1px solid #191D26;
+    background-color: var(--bg-primary);
+    border-right: 0.5px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr;
@@ -130,9 +173,9 @@ html:focus-within {
 .right {
     grid-row: 1 / 2;
     grid-column: 3 / 4;
-    background-color: black;
-    border-left: 0.5px solid #191D26;
-    border-top: 1px solid #191D26;
+    background-color: var(--bg-primary);
+    border-left: 0.5px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
     padding: 3rem;
 }
 
@@ -143,7 +186,7 @@ html:focus-within {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    border-bottom: 1px solid #191D26;
+    border-bottom: 1px solid var(--border-color);
     padding-left: 3.5rem;
 }
 
@@ -153,7 +196,7 @@ html:focus-within {
     display: flex;
     justify-content: left;
     flex-direction: column;
-    border-right: 1px solid #191D26;
+    border-right: 1px solid var(--border-color);
     padding-top: 1rem;
 }
 
@@ -183,7 +226,7 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 24px;
     font-weight: 400;
-    color: white;
+    color: var(--text-primary);
     margin-top: 2px;
 }
 
@@ -191,14 +234,14 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 24px;
     font-weight: 400;
-    color: #6c757d;
+    color: var(--text-abbre);
     margin-top: 2px;
 }
 
 .positive-rate {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
-    background-color: rgba(8, 28, 21, 0.6); 
+    background-color: var(--bg-positive-box); 
     display: flex;
     justify-content: left;
     flex-direction: column;
@@ -217,7 +260,7 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 24px;
     font-weight: 400;
-    color: #adb5bd;
+    color: var(--text-secondary);
     margin-top: 2px;
 }
 
@@ -233,19 +276,19 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 48px;
     font-weight: 500;
-    color: white;
+    color: var(--text-primary);
 }
 
 .ml-predict {
     grid-column: 3 / 4;
     grid-row: 1 / 2;
-    background-color: black;
+    background-color: var(--bg-primary);
     display: flex;
     justify-content: left;
     flex-direction: column;
     padding-left: 3.5rem;
     padding-top: 1rem;
-    color: white;
+    color: var(--text-primary);
 }
 
 .ml-upper {
@@ -274,7 +317,7 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 24px;
     font-weight: 400;
-    color: white;
+    color: var(--text-primary);
     margin-top: 2px;
 }
 
@@ -298,7 +341,7 @@ html:focus-within {
 }
 
 .status-text {
-    color: white;
+    color: var(--text-primary);
 }
 
 .status img {
@@ -333,7 +376,7 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 20px;
     font-weight: 500;
-    color: white;
+    color: var(--text-primary);
 }
 
 .left-chart {
@@ -358,37 +401,38 @@ html:focus-within {
     font-family: var(--main-font);
     font-size: 18px;
     font-weight: 500;
-    color: #adb5bd;
+    color: var(--text-secondary);
 }
 
 .chart-select {
     font-family: var(--main-font);
     font-size: 16px;
     font-weight: 400;
-    color: #fff;
-    background-color: #263344;
-    border: 1px solid #191D26;
+    color: white; /* Always white text inside dark select for consistency unless changed */
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 10px 20px;
     cursor: pointer;
     outline: none;
     transition: all 0.3s ease;
     min-width: 150px;
+    color: var(--text-primary);
 }
 
 .chart-select:hover {
-    background-color: #2f3e52;
-    border-color: #05DBAC;
+    background-color: var(--bg-card-hover);
+    border-color: var(--border-highlight);
 }
 
 .chart-select:focus {
-    border-color: #05DBAC;
+    border-color: var(--border-highlight);
     box-shadow: 0 0 0 2px rgba(5, 219, 172, 0.1);
 }
 
 .chart-select option {
-    background-color: #263344;
-    color: #fff;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
     padding: 10px;
 }
 
@@ -413,7 +457,7 @@ html:focus-within {
     width: 100%;
     height: 60px;
     padding: 0.5rem;
-    background-color: #191D26;
+    background-color: var(--bg-news-nav);
     border-radius: 15px;
     gap: 0.5rem;
 }
@@ -433,7 +477,7 @@ html:focus-within {
 .nav-item {
     font-family: var(--main-font);
     font-size: 18px;
-    color: #9CA3AF;
+    color: var(--text-muted);
     text-decoration: none;
     border-radius: 10px;
     transition: all 0.3s ease;
@@ -444,12 +488,12 @@ html:focus-within {
 }
 
 .nav-item:hover {
-    color: #6c757d;
+    color: var(--text-abbre);
 }
 
 .nav-item.active {
-    background-color: #263344;
-    color: #fff;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
 }
 
 /* */
@@ -464,8 +508,8 @@ html:focus-within {
 }
 
 .news {
-    border: 1px solid #191D26;
-    background-color: black;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
     border-radius: 25px;
     padding: 20px;
     margin-bottom: 20px;
@@ -474,12 +518,12 @@ html:focus-within {
 }
 
 .news:hover {
-    background-color: #12131A;
+    background-color: var(--bg-card-hover);
 }
 
 .timestamp {
     font-family: var(--main-font);
-    color: #9CA3AF;
+    color: var(--text-muted);
     font-size: 16px;
     margin-bottom: 15px;
 }
@@ -489,12 +533,12 @@ html:focus-within {
     font-size: 18px;
     font-weight: 500;
     margin-bottom: 10px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .description {
     font-family: var(--main-font);
-    color: #9CA3AF;
+    color: var(--text-muted);
     font-size: 16px;
     font-weight: 400;
     margin-bottom: 10px;
@@ -598,4 +642,12 @@ html:focus-within {
 .load-news::-webkit-scrollbar-thumb {
     background: #333;
     border-radius: 4px;
+}
+
+/* Theme Button Animation */
+.theme-btn {
+    transition: transform 0.3s ease;
+}
+.theme-btn:hover {
+    transform: scale(1.2) rotate(15deg);
 }

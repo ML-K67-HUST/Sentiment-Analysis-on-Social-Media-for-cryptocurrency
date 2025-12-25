@@ -17,7 +17,7 @@ def send_article_ids(topic: str, hash_ids: list, kafka_server: str = "kafka:9092
     producer = KafkaProducer(
         bootstrap_servers=[kafka_server],
         value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-        acks='all',  # Wait for all replicas
+        acks=1,  # Relaxed for dev environment
         retries=3,
         max_in_flight_requests_per_connection=1  # Ensure ordering
     )

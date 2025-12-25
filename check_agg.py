@@ -6,7 +6,6 @@ def check_aggregation_result():
     mongo = MongoManager('blog-data')
     
     print("Checking aggregated_features_10min collection...")
-    # Sort by window_start desc
     aggs = list(mongo.find(
         collection_name='aggregated_features_10min',
         filter={},

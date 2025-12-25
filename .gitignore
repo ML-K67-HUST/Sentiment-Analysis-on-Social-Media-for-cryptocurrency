@@ -175,3 +175,7 @@ frontend/data_*.json
 
 # MinIO data
 minio-data/
+fix_and_push.py
+EXPERIMENT_REPORT_DRAFT.md
+FINAL_EXPERIMENT_REPORT.md
+docs/

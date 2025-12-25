@@ -52,7 +52,6 @@ Dự án này xây dựng một pipeline dữ liệu hoàn chỉnh (End-to-End D
 *   **Prediction:** Hiển thị dự đoán xu hướng giá Bitcoin.
 
 ## 🏗 Kiến Trúc Hệ Thống
-
 ```mermaid
 graph TD
     subgraph Data Collection
@@ -127,3 +126,7 @@ graph TD
 ## 📝 Ghi Chú
 *   Hệ thống cần khoảng 1-2 giờ để tích lũy đủ dữ liệu cho quy trình Labeling và Training hoạt động lần đầu tiên.
 *   Đảm bảo Kafka và Zookeeper khởi động thành công (check logs nếu gặp lỗi connection).
+
+```
+docker-compose -f docker-compose.base.yml -f docker-compose.backend.yml -f docker-compose.airflow.yml up -d --remove-orphans --build
+```

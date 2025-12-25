@@ -1,16 +1,10 @@
-"""
-Sentiment Analysis Agent using LLM (Gemini or Together AI).
-Classifies cryptocurrency articles based on predefined policies.
-"""
 import json
 import os
 import sys
 
-# Add parent directory to path to import config
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config
 
-# Import LLM clients based on provider
 if config.LLM_PROVIDER == "gemini":
     from google import genai
     from google.genai import types
@@ -43,20 +37,35 @@ def infer_policy(text: str) -> dict:
 def _get_system_prompt() -> str:
     """Get the system prompt for sentiment analysis."""
     return """
-You are an expert cryptocurrency market analyst with 10 years of experience in sentiment analysis.
-Your task is to analyze cryptocurrency news articles and determine their overall sentiment towards the market.
+You are an expert cryptocurrency market analyst with 10 years of experience in sentiment analysis and detecting market manipulation.
+Your task is to analyze cryptocurrency news articles and determine their overall sentiment and intent towards the market.
 
 Analyze the article and classify it into one of these four categories:
-- "Bitcoin Reporting": The article provides factual, balanced, and objective information about Bitcoin. Bitcoin must be mentioned in the article.
-- "Bitcoin Price Manipulation": The article contains claims about Bitcoin's price going up or down without credible evidence or reasoning.
-- "Bitcoin Positive Speculation": The article presents a reasonable and well-substantiated case for why Bitcoin's price may increase.
-- "Bitcoin Negative Speculation": The article presents a reasonable and well-substantiated case for why Bitcoin's price may decrease.
+
+1. "Bitcoin Price Manipulation": 
+   - Look for SENSATIONALISM, FOMO (Fear Of Missing Out), or FUD (Fear, Uncertainty, Doubt).
+   - The article makes exaggerated price predictions (e.g., "skyrocket", "plummet", "to the moon", "death cross") without robust technical or fundamental backing.
+   - It attempts to emotionally trigger investors to buy or sell immediately.
+   - Includes paid promotional content disguised as news (shilling).
+
+2. "Bitcoin Positive Speculation": 
+   - The article presents a reasonable, logical, and well-substantiated case for why Bitcoin's price may increase.
+   - Cites specific on-chain data, institutional adoption, or macroeconomic factors.
+
+3. "Bitcoin Negative Speculation": 
+   - The article presents a reasonable, logical, and well-substantiated case for why Bitcoin's price may decrease.
+   - Cites specific regulatory concerns, technical resistance levels, or market cycle analysis.
+
+4. "Bitcoin Reporting": 
+   - The article provides factual, neutral, and objective information about Bitcoin (e.g., protocol updates, mining stats, historical events) without taking a bullish or bearish stance.
+
+IMPORTANT: If an article shows signs of BOTH Speculation and Manipulation, prioritize "Bitcoin Price Manipulation" if the language is overly emotional or lacks evidence.
 
 Return ONLY a valid JSON object with this exact structure (no markdown, no code blocks, no extra text):
 {
   "sentiment": "Bitcoin Reporting" or "Bitcoin Price Manipulation" or "Bitcoin Positive Speculation" or "Bitcoin Negative Speculation",
   "confidence": 0.85,
-  "reasoning": "Brief explanation of why this sentiment was chosen based on the article content"
+  "reasoning": "Brief explanation of why this sentiment was chosen based on the article content. Cite specific phrases."
 }
 
 Be concise and accurate. The confidence should be between 0.0 and 1.0.

@@ -23,7 +23,6 @@ class SentimentClassifier:
         if hasattr(self.model, 'predict_proba'):
             return self.model.predict_proba(X)
         elif hasattr(self.model, 'decision_function'):
-            # For SVM, use decision function
             return self.model.decision_function(X)
         else:
             return None
@@ -113,7 +112,7 @@ class LogisticRegressionClassifier(SentimentClassifier):
             class_weight=class_weight,
             max_iter=1000,
             random_state=42,
-            solver='saga',  # Supports both l1 and l2
+            solver='saga',  
             n_jobs=-1
         )
         
@@ -172,7 +171,6 @@ def train_all_models(X_train, y_train, X_test, y_test):
 
 
 if __name__ == "__main__":
-    # Test with dummy data
     from sklearn.datasets import make_classification
     
     X, y = make_classification(
@@ -188,7 +186,6 @@ if __name__ == "__main__":
         X, y, test_size=0.3, random_state=42
     )
     
-    # Test Naive Bayes
     nb = NaiveBayesClassifier(alpha=1.0)
     nb.train(X_train, y_train)
     predictions = nb.predict(X_test)
