@@ -13,7 +13,7 @@ except ImportError:
     try:
         from constants.config import MONGODB_URL
     except ImportError:
-        MONGODB_URL = os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27017")
+        MONGODB_URL = os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27018")
 
 
 class MongoManager:

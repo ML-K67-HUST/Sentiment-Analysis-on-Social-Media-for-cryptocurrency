@@ -165,7 +165,7 @@ def article_content_of_other_(url, title, date, symbol, category):
 def crawl_article_by_coin_id(coin_id, symbol, page_num, category=None):
     links = articles_link_of_(page_num, coin_id)
     if len(links) == 0:
-        return
+        return []
 
     contents = []
     for link in links:

@@ -177,5 +177,8 @@ frontend/data_*.json
 minio-data/
 fix_and_push.py
 EXPERIMENT_REPORT_DRAFT.md
-FINAL_EXPERIMENT_REPORT.md
+
 docs/
+report/
+wandb/
+mongodb_backup/

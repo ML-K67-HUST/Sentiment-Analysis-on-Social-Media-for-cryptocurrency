@@ -19,7 +19,7 @@ def crawl_articles(coin_id, symbol, page_num, max_page):
         try:
             contents = crawl_article_by_coin_id(coin_id, symbol, page_num)
 
-            if len(contents):
+            if contents and len(contents):
                 inserted_ids, error_ids, hash_ids = mongo_client.insert_many(
                     "cmc_news", contents
                 )

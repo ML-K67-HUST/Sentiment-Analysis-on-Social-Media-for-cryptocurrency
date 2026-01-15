@@ -29,7 +29,9 @@ class PredictionInput(BaseModel):
     total_ne_org_count: int
 
 app = FastAPI()
-mlflow.set_tracking_uri("http://mlflow:5000")
+# Use localhost for local dev, container name for docker
+tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5001")
+mlflow.set_tracking_uri(tracking_uri)
 
 # Global model and scaler variables (lazy loading)
 # Global variables
@@ -42,11 +44,33 @@ def load_scaler():
     global scaler
     if scaler is None:
         try:
-            scaler = joblib.load('services/scaler_10min.pkl')
-            print(f"✅ Loaded scaler_10min.pkl with {scaler.n_features_in_} features")
-        except FileNotFoundError:
-            print("❌ scaler_10min.pkl NOT FOUND. Cannot load scaler.")
-            raise HTTPException(status_code=500, detail="ML Scaler file missing")
+            # Try multiple locations for robustness
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            possible_paths = [
+                os.path.join(current_dir, 'scaler_10min.pkl'), # local / services dir
+                '/app/services/scaler_10min.pkl', # Docker container
+                'backend/services/scaler_10min.pkl' # Root execution
+            ]
+            
+            scaler_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    scaler_path = path
+                    break
+            
+            if scaler_path:
+                scaler = joblib.load(scaler_path)
+                print(f"✅ Loaded scaler from {scaler_path}")
+            else:
+                 # Create a dummy scaler if file missing (prevents crash, logs warning)
+                print("⚠️ scaler_10min.pkl NOT FOUND. Using Identity Scaler (No-op).")
+                from sklearn.preprocessing import StandardScaler
+                scaler = StandardScaler()
+                # Initialize with dummy data to avoid NotFittedError if possible, 
+                # or just let it fail gracefully later if strictly required.
+                # For robustness, we'll raise valid error but log heavily.
+                raise FileNotFoundError("Scaler file not found in any standard location.")
+
         except Exception as e:
             print(f"❌ Error loading scaler: {e}")
             raise HTTPException(status_code=500, detail=f"Scaler load error: {e}")

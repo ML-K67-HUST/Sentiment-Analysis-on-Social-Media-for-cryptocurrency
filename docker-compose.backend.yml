@@ -28,6 +28,7 @@ services:
       - ./airflow/dags/services/scaler.pkl:/src/services/scaler.pkl
       - ./airflow/dags/services/tfidf_vectorizer.pkl:/src/services/tfidf_vectorizer.pkl
       - ./airflow/dags/services/scaler_30min.pkl:/src/services/scaler_30min.pkl
+      - ./backend/services/scaler_10min.pkl:/src/services/scaler_10min.pkl
     networks:
       - sentiman-net
     healthcheck:

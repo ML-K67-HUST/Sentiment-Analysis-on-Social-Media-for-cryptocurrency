@@ -9,6 +9,8 @@ from database.mongodb import MongoManager
 import httpx
 import time
 from datetime import datetime, timedelta
+from cachetools import TTLCache
+import asyncio
 
 app = FastAPI(title="Coinmarketcap_articles_retrieve")
 app.add_middleware(
@@ -19,8 +21,22 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-mongo_client = MongoManager('blog-data')
+# --- Caching Setup ---
+# Cache for 60 seconds, max 100 items
+cache = TTLCache(maxsize=100, ttl=60)
 
+# --- Database Connection Reuse ---
+mongo_manager = None
+
+def get_db():
+    global mongo_manager
+    if mongo_manager is None:
+        mongo_manager = MongoManager('blog-data')
+    return mongo_manager
+
+@app.on_event("startup")
+async def startup_event():
+    get_db()
 
 @app.get("/",)
 async def health_check():
@@ -34,37 +50,56 @@ async def health_check():
 async def get_x():
     """
     DEPRECATED: Use /tradingview_ideas/ instead.
-    Kept for backwards compatibility.
     """
-    try:
-        # Redirect to TradingView ideas
-        return get_tradingview_ideas()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return await get_tradingview()
 
 
 @app.get("/tradingview_ideas/")
 async def get_tradingview():
     """
-    Get TradingView cryptocurrency trading ideas.
-    Replaces Twitter/X data source with TradingView analysis.
+    Get TradingView cryptocurrency trading ideas with caching.
     """
+    cache_key = "tradingview_ideas"
+    if cache_key in cache:
+        return cache[cache_key]
+        
     try:
-        return get_tradingview_ideas()
+        # Run synchronous function in thread pool
+        data = await asyncio.to_thread(get_tradingview_ideas)
+        cache[cache_key] = data
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/cmc_news/")
 async def get_cmc():
+    """
+    Get CMC news with caching.
+    """
+    cache_key = "cmc_news"
+    if cache_key in cache:
+        return cache[cache_key]
+
     try:
-        return get_cmc_news()
+        data = await asyncio.to_thread(get_cmc_news)
+        cache[cache_key] = data
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.get("/chart/")
 async def get_chart():
+    """
+    Get Chart data with caching.
+    """
+    cache_key = "chart_data"
+    if cache_key in cache:
+        return cache[cache_key]
+
     try:
-        return get_chart_data()
+        data = await asyncio.to_thread(get_chart_data)
+        cache[cache_key] = data
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -82,7 +117,8 @@ async def get_ml_prediction():
         timestamp: Current timestamp
     """
     try:
-        mongo_client = MongoManager('blog-data')
+        # Reuse connection
+        mongo_client = get_db()
         
         # Get latest 10-min aggregation 
         latest_aggregation = mongo_client.find_one(
@@ -124,9 +160,17 @@ async def get_ml_prediction():
         
         # Call ML API
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                "http://backend-ml-api:8002/predict",
-                json=ml_input
+            try:
+                response = await client.post(
+                    "http://backend-ml-api:8002/predict",
+                    json=ml_input
+                )
+            except httpx.ConnectError:
+                # Fallback to localhost for local development
+                print("⚠️ Cloud not connect to backend-ml-api, trying localhost...")
+                response = await client.post(
+                    "http://localhost:8002/predict",
+                    json=ml_input
                 )
             
             if response.status_code != 200:

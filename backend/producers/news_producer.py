@@ -2,11 +2,17 @@ import json
 from datetime import datetime
 from time import sleep
 from random import choice
+import sys
+import os
+
+# Allow running from producer directory
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from kafka import KafkaProducer
+from backend.config import config
 
-kafka_server = ["localhost:9092"]
-
-topic = "coinmarketcap-news"
+kafka_server = [config.KAFKA_BOOTSTRAP_SERVERS]
+topic = config.KAFKA_TOPIC
 
 producer = KafkaProducer(
     bootstrap_servers=kafka_server,

@@ -4,16 +4,23 @@ Subscribes to Kafka coinmarketcap-news topic and extracts NLP features
 """
 
 import json
+import sys
+import os
+
+# Allow running from consumer directory
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from kafka import KafkaConsumer
 from database.mongodb import MongoManager
 from nlp.feature_extractor import NLPFeatureExtractor
 import time
 from datetime import datetime
+from backend.config import config
 
-kafka_server = ['kafka:9092']
-topic = 'coinmarketcap-news'
+kafka_server = [config.KAFKA_BOOTSTRAP_SERVERS]
+topic = config.KAFKA_TOPIC
 
-mongo_client = MongoManager('blog-data')
+mongo_client = MongoManager(config.MONGODB_DATABASE)
 nlp_extractor = NLPFeatureExtractor()
 
 consumer = KafkaConsumer(

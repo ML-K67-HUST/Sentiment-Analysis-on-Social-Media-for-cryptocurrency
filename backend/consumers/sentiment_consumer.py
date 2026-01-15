@@ -1,16 +1,23 @@
 import json
 import time
+import sys
+import os
+
+# Allow running from consumer directory
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from tqdm import tqdm
 from kafka import KafkaConsumer, KafkaProducer
 from database.mongodb import MongoManager
 from bson.objectid import ObjectId
 from LLM.sentiment_agent import infer_policy, infer_sentiment
 from data_constructor import construct_unlabeled_dataset
+from backend.config import config
 
-kafka_server = ["kafka:9092"]
-topic = "coinmarketcap-news"
+kafka_server = [config.KAFKA_BOOTSTRAP_SERVERS]
+topic = config.KAFKA_TOPIC
 
-mongo_client = MongoManager('blog-data')
+mongo_client = MongoManager(config.MONGODB_DATABASE)
 
 consumer = KafkaConsumer(
     bootstrap_servers=kafka_server,

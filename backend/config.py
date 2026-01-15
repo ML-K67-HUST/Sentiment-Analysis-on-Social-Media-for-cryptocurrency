@@ -25,7 +25,7 @@ class Config:
     # =========================================================================
     # KAFKA CONFIGURATION
     # =========================================================================
-    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9094")
     KAFKA_TOPIC: str = os.getenv("KAFKA_TOPIC", "coinmarketcap-news")
     
     # =========================================================================

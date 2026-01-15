@@ -266,7 +266,7 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
       AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres/airflow
       AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
-      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__FERNET_KEY: '88uO3I47gWD7GOln7jtKe8rnOPhEXgMp02S_6UB96N4='
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
@@ -315,7 +315,7 @@ services:
         condition: service_healthy
     command: webserver
     ports:
-      - "8080:8080"
+      - "8085:8080"
     environment:
       <<: *airflow-common-env
     volumes:
@@ -437,6 +437,7 @@ services:
       start_period: 40s
 
   backend-consumer:
+    profiles: ["consumers"]
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -475,6 +476,7 @@ services:
 
   # NLP Feature Engineering Consumer
   backend-nlp-consumer:
+    profiles: ["consumers"]
     build:
       context: ./backend
       dockerfile: Dockerfile
